@@ -6,8 +6,8 @@ const fs = require("fs");
 const crypto = require("crypto");
 
 const app = express();
-const PORT = Number(process.env.AUTH_PORT || 3000);
-const HOST = process.env.AUTH_HOST || "127.0.0.1";
+const PORT = Number(process.env.PORT || process.env.AUTH_PORT || 3000);
+const HOST = "0.0.0.0";
 const ROOT = __dirname;
 const DATA_DIR = path.join(ROOT, "data");
 const DB_FILE = path.join(DATA_DIR, "queueflow-auth-db.json");
