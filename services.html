@@ -1,0 +1,1059 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101b35">
+  <title>QueueFlow | Service Management</title>
+
+  <style>
+    :root {
+      --navy: #101b35;
+      --blue: #365cf5;
+      --blue-dark: #2448db;
+      --bg: #f5f7fb;
+      --border: #e5e9f2;
+      --muted: #778198;
+      --green: #16865a;
+      --red: #b42323;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    header {
+      padding: 20px 5%;
+      background: var(--navy);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-icon {
+      width: 43px;
+      height: 43px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--blue);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    header h1 { margin: 0; font-size: 22px; }
+    header p { margin: 4px 0 0; color: #bdc9e0; font-size: 12px; }
+
+    .role {
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #26375d;
+      color: #c4d1ff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .6px;
+    }
+
+    main {
+      width: 90%;
+      max-width: 1250px;
+      margin: 34px auto 45px;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    h2 {
+      margin: 9px 0;
+      font-size: clamp(25px, 3vw, 32px);
+    }
+
+    .intro {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    button, .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 11px 15px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 750;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    button:hover, .back-link:hover { background: var(--blue-dark); }
+
+    button:focus-visible, input:focus-visible,
+    select:focus-visible, textarea:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #9cb0ff;
+      outline-offset: 2px;
+    }
+
+    .secondary-btn {
+      background: #edf1f8;
+      color: #34415c;
+    }
+
+    .secondary-btn:hover { background: #e0e6f1; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .summary-card {
+      position: relative;
+      overflow: hidden;
+      padding: 21px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      box-shadow: 0 4px 15px rgba(16, 27, 53, .025);
+    }
+
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      top: -20px;
+      right: -20px;
+      border-radius: 50%;
+      background: #edf1ff;
+    }
+
+    .summary-card span {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-card strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin-top: 12px;
+      font-size: 30px;
+    }
+
+    .summary-card small {
+      display: block;
+      margin-top: 5px;
+      color: #929bad;
+      font-size: 11px;
+    }
+
+    .panel {
+      margin-top: 23px;
+      padding: 25px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(16, 27, 53, .025);
+    }
+
+    .panel-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .panel h3 { margin: 0; font-size: 17px; }
+
+    .panel-heading p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .section-tag {
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: #edf1ff;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid #dce2ed;
+      border-radius: 8px;
+      color: var(--navy);
+      background: white;
+      font-size: 13px;
+      outline-color: var(--blue);
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    input::placeholder, textarea::placeholder { color: #a2aabb; }
+
+    .full { grid-column: 1 / -1; }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 13px 15px;
+      border-radius: 9px;
+      background: #f0f4ff;
+      color: #294bc3;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .notice strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    #message {
+      display: none;
+      margin: 15px 0 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    #message.show { display: block; }
+    #message.success { background: #eaf8f0; color: #167447; }
+    #message.error { background: #fff0f0; color: #b42323; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(145px, 190px) minmax(145px, 190px);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .search-box { position: relative; }
+
+    .search-box input { padding-left: 38px; }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      transform: translateY(-50%);
+      color: #8b96aa;
+      pointer-events: none;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #edf0f6;
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 14px 12px;
+      border-bottom: 1px solid #edf0f6;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8f9fc;
+      color: #778198;
+      font-size: 10px;
+      letter-spacing: .8px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafbff; }
+
+    .service-code {
+      display: inline-block;
+      padding: 7px 9px;
+      border-radius: 6px;
+      background: #edf1ff;
+      color: #365cf5;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .service-name { font-weight: 750; }
+    .service-description {
+      min-width: 150px;
+      max-width: 260px;
+      color: var(--muted);
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .floor-tag { background: #edf1ff; color: #365cf5; }
+    .active-tag { background: #e5f8ef; color: #16865a; }
+    .inactive-tag { background: #f0f1f5; color: #687185; }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .table-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .table-actions button { padding: 8px 10px; font-size: 11px; }
+
+    .edit-btn { background: #edf1ff; color: #365cf5; }
+    .edit-btn:hover { background: #dfe6ff; }
+
+    .toggle-btn {
+      background: #edf1f8;
+      color: #34415c;
+    }
+
+    .toggle-btn:hover { background: #e0e6f1; }
+
+    .remove-btn {
+      background: #fff0f0;
+      color: #b42323;
+    }
+
+    .remove-btn:hover { background: #ffe0e0; }
+
+    .empty {
+      padding: 35px 15px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .note {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    footer {
+      padding: 25px;
+      text-align: center;
+      color: #939caf;
+      font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+      main { width: 92%; }
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .search-box { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 600px) {
+      header {
+        padding: 18px 4%;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      main { margin-top: 25px; }
+      .topline { align-items: flex-start; flex-direction: column; }
+      .panel { padding: 17px; }
+      .panel-heading { flex-direction: column; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .summary { gap: 10px; }
+      .summary-card { padding: 16px; }
+      .summary-card strong { font-size: 26px; }
+      .toolbar { grid-template-columns: 1fr; }
+      .search-box { grid-column: auto; }
+      th, td { padding: 12px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">Q</div>
+      <div>
+        <h1>QueueFlow</h1>
+        <p>Queue Management System</p>
+      </div>
+    </div>
+    <div class="role">ADMIN · SERVICE SETUP</div>
+  </header>
+
+  <main>
+    <div class="topline">
+      <div>
+        <div class="eyebrow">ADMINISTRATION / SERVICES</div>
+        <h2>Service Management</h2>
+        <p class="intro">Manage the services available to customers on each floor.</p>
+      </div>
+      <a class="back-link" href="admin.html">← Back to Dashboard</a>
+    </div>
+
+    <section class="summary" aria-label="Service summary">
+      <article class="summary-card">
+        <span>Total Services</span>
+        <strong id="totalServices">0</strong>
+        <small>All registered services</small>
+      </article>
+      <article class="summary-card">
+        <span>Active Services</span>
+        <strong id="activeServices">0</strong>
+        <small>Available in this configuration</small>
+      </article>
+      <article class="summary-card">
+        <span>Inactive Services</span>
+        <strong id="inactiveServices">0</strong>
+        <small>Currently disabled</small>
+      </article>
+      <article class="summary-card">
+        <span>Floors Covered</span>
+        <strong id="floorCount">0</strong>
+        <small>Floors with registered services</small>
+      </article>
+    </section>
+
+    <section class="panel" id="formPanel">
+      <div class="panel-heading">
+        <div>
+          <h3 id="formTitle">Add a Service</h3>
+          <p>Configure the service name, code, floor, and availability.</p>
+        </div>
+        <span class="section-tag" id="formTag">NEW SERVICE</span>
+      </div>
+
+      <form id="serviceForm">
+        <div class="form-grid">
+          <div>
+            <label for="serviceName">Service Name *</label>
+            <input id="serviceName" maxlength="80"
+              placeholder="e.g. General Inquiry" required>
+          </div>
+
+          <div>
+            <label for="serviceCode">Service Code *</label>
+            <input id="serviceCode" maxlength="12"
+              placeholder="e.g. GEN" autocomplete="off"
+              autocapitalize="characters" required>
+          </div>
+
+          <div>
+            <label for="serviceFloor">Assigned Floor *</label>
+            <select id="serviceFloor" required>
+              <option value="G">Ground Floor</option>
+              <option value="2">2nd Floor</option>
+              <option value="3">3rd Floor</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="serviceStatus">Service Status</label>
+            <select id="serviceStatus">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div class="full">
+            <label for="serviceDescription">Description</label>
+            <textarea id="serviceDescription" maxlength="250"
+              placeholder="Briefly describe this service (optional)"></textarea>
+          </div>
+
+          <div class="full form-actions">
+            <button type="submit" id="submitBtn">＋ Add Service</button>
+            <button type="button" class="secondary-btn" id="cancelEditBtn" hidden>
+              Cancel Edit
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="notice">
+        <strong>Prototype storage notice</strong>
+        Service settings are saved in this browser using localStorage. This page does
+        not yet automatically update the customer kiosk or share settings across
+        different computers.
+      </div>
+
+      <p id="message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Registered Services</h3>
+          <p>Search, filter, edit, or update your service configuration.</p>
+        </div>
+        <span class="section-tag" id="recordTag">0 RECORDS</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search"
+            placeholder="Search service name or code..."
+            aria-label="Search services">
+        </div>
+
+        <select id="floorFilter" aria-label="Filter by floor">
+          <option value="all">All Floors</option>
+          <option value="G">Ground Floor</option>
+          <option value="2">2nd Floor</option>
+          <option value="3">3rd Floor</option>
+        </select>
+
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="all">All Statuses</option>
+          <option value="Active">Active Only</option>
+          <option value="Inactive">Inactive Only</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>CODE</th>
+              <th>SERVICE NAME</th>
+              <th>FLOOR</th>
+              <th>DESCRIPTION</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="serviceList"></tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="tableCount">Showing 0 services</span>
+        <button type="button" class="secondary-btn" id="clearFiltersBtn">
+          Clear Filters
+        </button>
+      </div>
+    </section>
+
+    <p class="note">
+      Note: These are service configuration records only. Connecting services to
+      ticket generation and teller routing requires additional integration with
+      the kiosk and queue-processing logic.
+    </p>
+  </main>
+
+  <footer>QueueFlow · Service Management</footer>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "qmsServicesV1";
+
+    const floorNames = {
+      G: "Ground Floor",
+      "2": "2nd Floor",
+      "3": "3rd Floor"
+    };
+
+    const form = document.getElementById("serviceForm");
+    const nameInput = document.getElementById("serviceName");
+    const codeInput = document.getElementById("serviceCode");
+    const floorInput = document.getElementById("serviceFloor");
+    const statusInput = document.getElementById("serviceStatus");
+    const descriptionInput = document.getElementById("serviceDescription");
+    const serviceList = document.getElementById("serviceList");
+    const messageElement = document.getElementById("message");
+
+    let services = loadServices();
+    let editingId = null;
+    let messageTimer = null;
+
+    function loadServices() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+
+        const saved = JSON.parse(raw);
+        if (!Array.isArray(saved)) return [];
+
+        return saved
+          .filter(service =>
+            service &&
+            typeof service === "object" &&
+            typeof service.id === "string"
+          )
+          .map(service => ({
+            id: service.id,
+            name: String(service.name || ""),
+            code: String(service.code || "").trim().toUpperCase(),
+            floor: ["G", "2", "3"].includes(String(service.floor))
+              ? String(service.floor) : "G",
+            status: service.status === "Inactive" ? "Inactive" : "Active",
+            description: String(service.description || "")
+          }));
+      } catch (error) {
+        console.error("Unable to load services:", error);
+        return [];
+      }
+    }
+
+    function saveServices(nextServices) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextServices));
+        services = nextServices;
+        return true;
+      } catch (error) {
+        console.error("Unable to save services:", error);
+        showMessage(
+          "Unable to save changes. Check browser storage settings or available storage space.",
+          true
+        );
+        return false;
+      }
+    }
+
+    function showMessage(message, isError = false) {
+      clearTimeout(messageTimer);
+      messageElement.textContent = message;
+      messageElement.className = "show " + (isError ? "error" : "success");
+
+      messageTimer = setTimeout(() => {
+        messageElement.textContent = "";
+        messageElement.className = "";
+      }, 5000);
+    }
+
+    function addCell(row, value, className = "") {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      if (className) cell.className = className;
+      row.appendChild(cell);
+      return cell;
+    }
+
+    function renderSummary() {
+      const active = services.filter(service => service.status === "Active");
+      const inactive = services.filter(service => service.status === "Inactive");
+      const floors = new Set(services.map(service => service.floor));
+
+      document.getElementById("totalServices").textContent = services.length;
+      document.getElementById("activeServices").textContent = active.length;
+      document.getElementById("inactiveServices").textContent = inactive.length;
+      document.getElementById("floorCount").textContent = floors.size;
+
+      document.getElementById("recordTag").textContent =
+        services.length + (services.length === 1 ? " RECORD" : " RECORDS");
+    }
+
+    function renderTable() {
+      const query = document.getElementById("searchInput")
+        .value.trim().toLowerCase();
+
+      const selectedFloor = document.getElementById("floorFilter").value;
+      const selectedStatus = document.getElementById("statusFilter").value;
+
+      const filtered = services.filter(service => {
+        const matchesSearch =
+          service.name.toLowerCase().includes(query) ||
+          service.code.toLowerCase().includes(query) ||
+          service.description.toLowerCase().includes(query);
+
+        const matchesFloor =
+          selectedFloor === "all" || service.floor === selectedFloor;
+
+        const matchesStatus =
+          selectedStatus === "all" || service.status === selectedStatus;
+
+        return matchesSearch && matchesFloor && matchesStatus;
+      });
+
+      serviceList.replaceChildren();
+
+      if (filtered.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 6;
+        cell.className = "empty";
+        cell.textContent = services.length === 0
+          ? "No services registered yet. Add your first service using the form above."
+          : "No services match your search or filters.";
+        row.appendChild(cell);
+        serviceList.appendChild(row);
+      } else {
+        filtered.forEach(service => {
+          const row = document.createElement("tr");
+
+          const codeCell = addCell(row, "");
+          const codeBadge = document.createElement("span");
+          codeBadge.className = "service-code";
+          codeBadge.textContent = service.code || "—";
+          codeCell.appendChild(codeBadge);
+
+          addCell(row, service.name, "service-name");
+
+          const floorCell = addCell(row, "");
+          const floorBadge = document.createElement("span");
+          floorBadge.className = "tag floor-tag";
+          floorBadge.textContent = floorNames[service.floor] || service.floor;
+          floorCell.appendChild(floorBadge);
+
+          addCell(row, service.description || "—", "service-description");
+
+          const statusCell = addCell(row, "");
+          const statusBadge = document.createElement("span");
+          statusBadge.className = service.status === "Active"
+            ? "tag active-tag"
+            : "tag inactive-tag";
+
+          const dot = document.createElement("span");
+          dot.className = "status-dot";
+
+          statusBadge.append(dot, document.createTextNode(service.status));
+          statusCell.appendChild(statusBadge);
+
+          const actionsCell = addCell(row, "");
+          const actions = document.createElement("div");
+          actions.className = "table-actions";
+
+          const editButton = document.createElement("button");
+          editButton.type = "button";
+          editButton.className = "edit-btn";
+          editButton.textContent = "Edit";
+          editButton.setAttribute("aria-label", "Edit " + service.name);
+          editButton.addEventListener("click", () => editService(service.id));
+
+          const toggleButton = document.createElement("button");
+          toggleButton.type = "button";
+          toggleButton.className = "toggle-btn";
+          toggleButton.textContent =
+            service.status === "Active" ? "Deactivate" : "Activate";
+          toggleButton.setAttribute(
+            "aria-label",
+            (service.status === "Active" ? "Deactivate " : "Activate ") +
+            service.name
+          );
+          toggleButton.addEventListener("click", () => toggleService(service.id));
+
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "remove-btn";
+          deleteButton.textContent = "Delete";
+          deleteButton.setAttribute("aria-label", "Delete " + service.name);
+          deleteButton.addEventListener("click", () => removeService(service.id));
+
+          actions.append(editButton, toggleButton, deleteButton);
+          actionsCell.appendChild(actions);
+
+          serviceList.appendChild(row);
+        });
+      }
+
+      document.getElementById("tableCount").textContent =
+        "Showing " + filtered.length + " of " + services.length + " services";
+    }
+
+    function render() {
+      renderSummary();
+      renderTable();
+    }
+
+    function resetForm() {
+      form.reset();
+      floorInput.value = "G";
+      statusInput.value = "Active";
+      editingId = null;
+
+      document.getElementById("formTitle").textContent = "Add a Service";
+      document.getElementById("formTag").textContent = "NEW SERVICE";
+      document.getElementById("submitBtn").textContent = "＋ Add Service";
+      document.getElementById("cancelEditBtn").hidden = true;
+    }
+
+    function editService(id) {
+      const service = services.find(item => item.id === id);
+      if (!service) {
+        showMessage("This service could not be found.", true);
+        return;
+      }
+
+      editingId = id;
+      nameInput.value = service.name;
+      codeInput.value = service.code;
+      floorInput.value = service.floor;
+      statusInput.value = service.status;
+      descriptionInput.value = service.description;
+
+      document.getElementById("formTitle").textContent = "Edit Service";
+      document.getElementById("formTag").textContent = "EDITING RECORD";
+      document.getElementById("submitBtn").textContent = "Save Changes";
+      document.getElementById("cancelEditBtn").hidden = false;
+
+      document.getElementById("formPanel").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      nameInput.focus({ preventScroll: true });
+    }
+
+    function isDuplicateCode(code, ignoredId = null) {
+      const normalizedCode = code.trim().toUpperCase();
+
+      return services.some(service =>
+        service.id !== ignoredId &&
+        service.code.trim().toUpperCase() === normalizedCode
+      );
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const name = nameInput.value.trim();
+      const code = codeInput.value.trim().toUpperCase();
+      const floor = floorInput.value;
+      const status = statusInput.value;
+      const description = descriptionInput.value.trim();
+
+      if (!name || !code) {
+        showMessage("Please enter both the service name and service code.", true);
+        return;
+      }
+
+      if (!/^[A-Z0-9_-]+$/.test(code)) {
+        showMessage(
+          "Use only letters, numbers, hyphens, or underscores in the service code.",
+          true
+        );
+        return;
+      }
+
+      if (!["G", "2", "3"].includes(floor)) {
+        showMessage("Please select a valid floor.", true);
+        return;
+      }
+
+      if (!["Active", "Inactive"].includes(status)) {
+        showMessage("Please select a valid service status.", true);
+        return;
+      }
+
+      if (isDuplicateCode(code, editingId)) {
+        showMessage(
+          "This service code already exists. Please use a unique code.",
+          true
+        );
+        return;
+      }
+
+      if (editingId !== null) {
+        if (!services.some(service => service.id === editingId)) {
+          showMessage(
+            "This service no longer exists. Refresh the page and try again.",
+            true
+          );
+          resetForm();
+          return;
+        }
+
+        const nextServices = services.map(service =>
+          service.id === editingId
+            ? { ...service, name, code, floor, status, description }
+            : service
+        );
+
+        if (!saveServices(nextServices)) return;
+
+        resetForm();
+        render();
+        showMessage("Service updated successfully.");
+      } else {
+        const newService = {
+          id: (window.crypto && typeof window.crypto.randomUUID === "function")
+            ? window.crypto.randomUUID()
+            : Date.now() + "-" + Math.random().toString(16).slice(2),
+          name,
+          code,
+          floor,
+          status,
+          description
+        };
+
+        if (!saveServices([...services, newService])) return;
+
+        resetForm();
+        render();
+        showMessage("Service added successfully.");
+      }
+    });
+
+    function toggleService(id) {
+      const service = services.find(item => item.id === id);
+      if (!service) return;
+
+      const nextStatus = service.status === "Active" ? "Inactive" : "Active";
+
+      const nextServices = services.map(item =>
+        item.id === id ? { ...item, status: nextStatus } : item
+      );
+
+      if (!saveServices(nextServices)) return;
+
+      if (editingId === id) {
+        statusInput.value = nextStatus;
+      }
+
+      render();
+      showMessage('"' + service.name + '" is now ' + nextStatus + ".");
+    }
+
+    function removeService(id) {
+      const service = services.find(item => item.id === id);
+      if (!service) return;
+
+      if (!confirm('Delete the service "' + service.name + '"? This cannot be undone.')) {
+        return;
+      }
+
+      const nextServices = services.filter(item => item.id !== id);
+
+      if (!saveServices(nextServices)) return;
+
+      if (editingId === id) resetForm();
+
+      render();
+      showMessage("Service deleted successfully.");
+    }
+
+    document.getElementById("cancelEditBtn").addEventListener("click", () => {
+      resetForm();
+      showMessage("Editing cancelled.");
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderTable);
+    document.getElementById("floorFilter").addEventListener("change", renderTable);
+    document.getElementById("statusFilter").addEventListener("change", renderTable);
+
+    document.getElementById("clearFiltersBtn").addEventListener("click", () => {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("floorFilter").value = "all";
+      document.getElementById("statusFilter").value = "all";
+      renderTable();
+    });
+
+    window.addEventListener("storage", event => {
+      if (event.key === STORAGE_KEY || event.key === null) {
+        services = loadServices();
+
+        if (editingId && !services.some(service => service.id === editingId)) {
+          resetForm();
+        }
+
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
+```

@@ -1,0 +1,716 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QueueFlow | Teller Dashboard</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f4f6fb;
+      color: #101b35;
+    }
+
+    header {
+      background: #101b35;
+      color: white;
+      padding: 22px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    header h1 { margin: 0; font-size: 23px; }
+    header p { margin: 5px 0 0; color: #bac6df; font-size: 13px; }
+
+    .role {
+      background: #24375c;
+      color: #a9c0ff;
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1250px;
+      width: 90%;
+      margin: 35px auto;
+    }
+
+    .eyebrow {
+      color: #365cf5;
+      font-size: 11px;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    h2 { font-size: 32px; margin: 9px 0; }
+    .subtitle { color: #778198; margin-bottom: 28px; line-height: 1.6; }
+
+    .notice {
+      padding: 14px 17px;
+      background: #eaf0ff;
+      border-radius: 10px;
+      color: #294bc3;
+      font-size: 13px;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .floor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e5e9f2;
+      border-radius: 16px;
+      padding: 23px;
+      box-shadow: 0 5px 20px #15264b08;
+      min-width: 0;
+    }
+
+    .floor-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .floor-heading h3 { font-size: 18px; margin: 0; }
+
+    .floor-icon {
+      min-width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: #edf1ff;
+      color: #365cf5;
+      font-weight: bold;
+    }
+
+    .label {
+      display: block;
+      color: #778198;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-top: 23px;
+    }
+
+    .serving-number {
+      font-size: 35px;
+      font-weight: 800;
+      color: #365cf5;
+      margin: 7px 0 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .serving-service {
+      font-size: 12px;
+      color: #778198;
+      line-height: 1.6;
+      min-height: 20px;
+      margin-bottom: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .waiting-summary {
+      padding: 12px;
+      background: #f6f8fc;
+      border-radius: 9px;
+      font-size: 13px;
+    }
+
+    .waiting-summary strong { color: #101b35; }
+
+    .waiting-list {
+      min-height: 48px;
+      color: #778198;
+      font-size: 12px;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 14px;
+      width: 100%;
+      background: #365cf5;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: filter .15s ease;
+    }
+
+    button:hover:not(:disabled) { filter: brightness(.93); }
+
+    button:disabled {
+      background: #aab4cb;
+      cursor: not-allowed;
+    }
+
+    .complete-btn { background: #168653; }
+
+    .refresh-btn {
+      width: auto;
+      margin: 0;
+      background: white;
+      color: #101b35;
+      border: 1px solid #e2e7f0;
+      padding: 10px 13px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 17px;
+    }
+
+    .section-title h3 { margin: 0; }
+
+    .activity {
+      margin-top: 25px;
+      background: white;
+      border: 1px solid #e5e9f2;
+      border-radius: 16px;
+      padding: 23px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 14px 10px;
+      border-bottom: 1px solid #e7eaf1;
+      vertical-align: top;
+    }
+
+    th {
+      color: #778198;
+      font-size: 10px;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+
+    td { overflow-wrap: anywhere; }
+
+    .status {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 6px;
+      background: #fff1c7;
+      color: #865b00;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status.serving {
+      background: #d9fbe8;
+      color: #087443;
+    }
+
+    .status.completed {
+      background: #e8edf5;
+      color: #536078;
+    }
+
+    .empty {
+      color: #778198;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .system-message {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #778198;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      color: #939caf;
+      font-size: 11px;
+      padding: 20px;
+    }
+
+    @media (max-width: 1000px) {
+      .floor-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      header { align-items: flex-start; flex-direction: column; }
+      h2 { font-size: 27px; }
+      main { width: 92%; margin: 25px auto; }
+      .card, .activity { padding: 17px; }
+      .section-title { align-items: flex-start; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>QueueFlow</h1>
+      <p>Queue Management System</p>
+    </div>
+    <div class="role">TELLER DASHBOARD</div>
+  </header>
+
+  <main>
+    <div class="eyebrow">COUNTER OPERATIONS</div>
+    <h2>Now Serving</h2>
+    <p class="subtitle">
+      Call the next customer, check their service, and manage the waiting queue.
+    </p>
+
+    <div class="notice">
+      <strong>Instructions:</strong>
+      Click CALL NEXT to call the next waiting customer.
+      Click COMPLETE when the customer's transaction is finished.
+      Only one customer can be served per floor at a time.
+    </div>
+
+    <div class="floor-grid" id="floorGrid"></div>
+
+    <section class="activity">
+      <div class="section-title">
+        <h3>Recent Queue Activity</h3>
+        <button type="button" class="refresh-btn" id="refreshBtn">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>QUEUE NUMBER</th>
+            <th>FLOOR</th>
+            <th>SERVICE</th>
+            <th>STATUS</th>
+            <th>TIME</th>
+          </tr>
+        </thead>
+        <tbody id="activityList">
+          <tr>
+            <td colspan="5" class="empty">Loading queue activity...</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="system-message" id="systemMessage" role="status" aria-live="polite">
+        Queue data is synchronized through this browser's local storage.
+      </p>
+    </section>
+  </main>
+
+  <footer>QueueFlow · Teller Operations</footer>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "qmsDataV1";
+
+    const FLOOR_DEFAULTS = {
+      G: { name: "Ground Floor", next: 1, waiting: [], serving: null },
+      "2": { name: "2nd Floor", next: 1, waiting: [], serving: null },
+      "3": { name: "3rd Floor", next: 1, waiting: [], serving: null }
+    };
+
+    const floorGrid = document.getElementById("floorGrid");
+    const activityList = document.getElementById("activityList");
+    const systemMessage = document.getElementById("systemMessage");
+
+    function cloneDefaults() {
+      return JSON.parse(JSON.stringify({
+        floors: FLOOR_DEFAULTS,
+        totalIssued: 0,
+        activity: []
+      }));
+    }
+
+    function loadData() {
+      const defaults = cloneDefaults();
+
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaults;
+
+        const saved = JSON.parse(raw);
+
+        if (!saved || typeof saved !== "object" || Array.isArray(saved)) {
+          return defaults;
+        }
+
+        for (const key of Object.keys(defaults.floors)) {
+          const source = saved.floors?.[key];
+          if (!source || typeof source !== "object") continue;
+
+          const target = defaults.floors[key];
+
+          target.name = typeof source.name === "string" && source.name.trim()
+            ? source.name
+            : target.name;
+
+          const next = Number(source.next);
+          target.next = Number.isFinite(next) && next > 0
+            ? Math.floor(next)
+            : 1;
+
+          target.waiting = Array.isArray(source.waiting)
+            ? source.waiting.filter(ticket => typeof ticket === "string")
+            : [];
+
+          target.serving = typeof source.serving === "string" && source.serving
+            ? source.serving
+            : null;
+        }
+
+        const total = Number(saved.totalIssued);
+        defaults.totalIssued = Number.isFinite(total) && total >= 0
+          ? total
+          : 0;
+
+        defaults.activity = Array.isArray(saved.activity)
+          ? saved.activity.filter(item =>
+              item && typeof item === "object" &&
+              typeof item.ticket === "string"
+            )
+          : [];
+
+        return defaults;
+      } catch (error) {
+        console.error("Unable to read queue data:", error);
+        return null;
+      }
+    }
+
+    let data = loadData();
+
+    function setMessage(text) {
+      systemMessage.textContent = text;
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        setMessage("Queue updated successfully.");
+        return true;
+      } catch (error) {
+        console.error("Unable to save queue data:", error);
+        setMessage("ERROR: Unable to save queue data. Check browser storage.");
+        alert("Unable to save queue data. Your changes have been rolled back.");
+        return false;
+      }
+    }
+
+    function snapshotData() {
+      return JSON.stringify(data);
+    }
+
+    function restoreData(snapshot) {
+      data = JSON.parse(snapshot);
+      render();
+    }
+
+    function createElement(tag, className, text) {
+      const element = document.createElement(tag);
+
+      if (className) element.className = className;
+      if (text !== undefined && text !== null) {
+        element.textContent = String(text);
+      }
+
+      return element;
+    }
+
+    function createButton(text, className, disabled, handler) {
+      const button = createElement("button", className, text);
+      button.type = "button";
+      button.disabled = Boolean(disabled);
+      button.addEventListener("click", handler);
+      return button;
+    }
+
+    function getServiceLabel(item) {
+      const code = String(item.serviceCode || "").trim();
+      const name = String(item.service || "").trim();
+
+      if (code && name) return `${code} — ${name}`;
+      return name || code || "—";
+    }
+
+    function updateTicketActivity(ticket, floorName, status) {
+      const item = data.activity.find(entry => entry.ticket === ticket);
+
+      const time = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      if (item) {
+        item.status = status;
+        item.floor = floorName;
+        item.time = time;
+      } else {
+        data.activity.unshift({
+          ticket,
+          floor: floorName,
+          service: "",
+          serviceCode: "",
+          status,
+          time
+        });
+      }
+
+      data.activity = data.activity.slice(0, 12);
+    }
+
+    function renderFloor(key, floor) {
+      const card = createElement("section", "card");
+
+      const heading = createElement("div", "floor-heading");
+      heading.append(
+        createElement("h3", "", floor.name),
+        createElement("div", "floor-icon", key)
+      );
+      card.appendChild(heading);
+
+      card.appendChild(createElement("span", "label", "CURRENTLY SERVING"));
+      card.appendChild(createElement("div", "serving-number", floor.serving || "---"));
+
+      const currentActivity = floor.serving
+        ? data.activity.find(item => item.ticket === floor.serving)
+        : null;
+
+      card.appendChild(createElement(
+        "div",
+        "serving-service",
+        currentActivity ? `Service: ${getServiceLabel(currentActivity)}` : "No active customer"
+      ));
+
+      const summary = createElement("div", "waiting-summary");
+      summary.append(
+        document.createTextNode("Customers waiting: "),
+        createElement("strong", "", floor.waiting.length)
+      );
+      card.appendChild(summary);
+
+      card.appendChild(createElement("span", "label", "WAITING QUEUE"));
+
+      const waitingList = createElement("div", "waiting-list");
+      waitingList.textContent = floor.waiting.length
+        ? floor.waiting.slice(0, 8).join(", ") +
+          (floor.waiting.length > 8 ? " ..." : "")
+        : "No customers waiting";
+
+      card.appendChild(waitingList);
+
+      card.appendChild(createButton(
+        "CALL NEXT",
+        "",
+        floor.waiting.length === 0 || Boolean(floor.serving),
+        () => callNext(key)
+      ));
+
+      card.appendChild(createButton(
+        "COMPLETE",
+        "complete-btn",
+        !floor.serving,
+        () => completeCustomer(key)
+      ));
+
+      return card;
+    }
+
+    function render() {
+      floorGrid.replaceChildren();
+
+      if (!data) {
+        floorGrid.appendChild(createElement(
+          "div",
+          "card",
+          "Queue data could not be read. Check browser storage, then refresh."
+        ));
+        renderActivity();
+        return;
+      }
+
+      for (const key of Object.keys(FLOOR_DEFAULTS)) {
+        floorGrid.appendChild(renderFloor(key, data.floors[key]));
+      }
+
+      renderActivity();
+    }
+
+    function renderActivity() {
+      activityList.replaceChildren();
+
+      if (!data || !data.activity.length) {
+        const row = document.createElement("tr");
+        const cell = createElement("td", "empty", "No queue activity yet.");
+        cell.colSpan = 5;
+        row.appendChild(cell);
+        activityList.appendChild(row);
+        return;
+      }
+
+      data.activity.slice(0, 12).forEach(item => {
+        const row = document.createElement("tr");
+
+        const ticketCell = document.createElement("td");
+        ticketCell.appendChild(createElement("strong", "", item.ticket));
+
+        const floorCell = createElement("td", "", item.floor || "—");
+        const serviceCell = createElement("td", "", getServiceLabel(item));
+
+        const statusCell = document.createElement("td");
+        const statusText = String(item.status || "Waiting");
+        let statusClass = "status";
+
+        if (statusText.toLowerCase() === "now serving") {
+          statusClass += " serving";
+        } else if (statusText.toLowerCase() === "completed") {
+          statusClass += " completed";
+        }
+
+        statusCell.appendChild(createElement("span", statusClass, statusText));
+
+        const timeCell = createElement("td", "", item.time || "—");
+
+        row.append(ticketCell, floorCell, serviceCell, statusCell, timeCell);
+        activityList.appendChild(row);
+      });
+    }
+
+    function callNext(key) {
+      if (!data) {
+        alert("Queue data is unavailable. Refresh the page and try again.");
+        return;
+      }
+
+      const floor = data.floors[key];
+
+      if (!floor || floor.waiting.length === 0) {
+        alert("No waiting customers for this floor.");
+        return;
+      }
+
+      if (floor.serving) {
+        alert(`Please complete ticket ${floor.serving} before calling the next customer.`);
+        return;
+      }
+
+      const snapshot = snapshotData();
+
+      const ticket = floor.waiting.shift();
+      floor.serving = ticket;
+
+      updateTicketActivity(ticket, floor.name, "Now Serving");
+
+      if (!saveData()) {
+        restoreData(snapshot);
+        return;
+      }
+
+      render();
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+
+        const speech = new SpeechSynthesisUtterance(
+          `Now serving ${ticket}. Please proceed to ${floor.name}.`
+        );
+
+        window.speechSynthesis.speak(speech);
+      }
+    }
+
+    function completeCustomer(key) {
+      if (!data) {
+        alert("Queue data is unavailable. Refresh the page and try again.");
+        return;
+      }
+
+      const floor = data.floors[key];
+
+      if (!floor || !floor.serving) {
+        alert("No customer is currently being served.");
+        return;
+      }
+
+      const snapshot = snapshotData();
+      const ticket = floor.serving;
+
+      updateTicketActivity(ticket, floor.name, "Completed");
+      floor.serving = null;
+
+      if (!saveData()) {
+        restoreData(snapshot);
+        return;
+      }
+
+      render();
+    }
+
+    function refreshData() {
+      const refreshed = loadData();
+
+      if (!refreshed) {
+        setMessage("Could not refresh queue data. Check browser storage.");
+        return;
+      }
+
+      data = refreshed;
+      render();
+      setMessage("Queue data refreshed.");
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", refreshData);
+
+    window.addEventListener("storage", event => {
+      if (event.key === STORAGE_KEY || event.key === null) {
+        refreshData();
+      }
+    });
+
+    // Poll to detect tickets issued or updated in another tab.
+    setInterval(() => {
+      const refreshed = loadData();
+
+      if (refreshed) {
+        data = refreshed;
+        render();
+      }
+    }, 2000);
+
+    if (!data) {
+      setMessage("Queue data could not be read. Check browser storage.");
+    }
+
+    render();
+  </script>
+</body>
+</html>
+```

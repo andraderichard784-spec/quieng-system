@@ -1,0 +1,1049 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101b35">
+  <title>QueueFlow | Teller Management</title>
+
+  <style>
+    :root {
+      --navy: #101b35;
+      --blue: #365cf5;
+      --blue-dark: #2448db;
+      --bg: #f5f7fb;
+      --border: #e5e9f2;
+      --muted: #778198;
+      --green: #16865a;
+      --red: #b42323;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border-radius: 12px;
+      background: var(--blue);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    header h1 { margin: 0; font-size: 22px; }
+    header p { color: #bac6df; margin: 4px 0 0; font-size: 12px; }
+
+    .role {
+      background: #26375d;
+      color: #d5ddff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .7px;
+    }
+
+    main {
+      max-width: 1250px;
+      width: 90%;
+      margin: 34px auto 45px;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    h2 { margin: 9px 0; font-size: clamp(25px, 3vw, 32px); }
+    .intro { color: var(--muted); line-height: 1.7; margin: 0; font-size: 14px; }
+
+    .back-link, button {
+      border: 0;
+      border-radius: 8px;
+      padding: 11px 15px;
+      background: var(--blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 750;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      transition: background .2s, transform .2s;
+    }
+
+    button:hover, .back-link:hover {
+      background: var(--blue-dark);
+    }
+
+    button:active { transform: scale(.98); }
+
+    button:focus-visible, input:focus-visible, select:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #9cb0ff;
+      outline-offset: 2px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 25px;
+    }
+
+    .summary-card {
+      position: relative;
+      overflow: hidden;
+      padding: 21px;
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 15px rgba(16, 27, 53, .025);
+    }
+
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      right: -17px;
+      top: -17px;
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: #edf1ff;
+    }
+
+    .summary-card span {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-card strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      font-size: 31px;
+      margin-top: 12px;
+      letter-spacing: -.8px;
+    }
+
+    .summary-card small {
+      display: block;
+      margin-top: 5px;
+      color: #98a1b4;
+      font-size: 11px;
+    }
+
+    .panel {
+      margin-top: 23px;
+      padding: 25px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: white;
+      box-shadow: 0 5px 20px rgba(16, 27, 53, .025);
+    }
+
+    .panel-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .panel h3 { margin: 0; font-size: 17px; }
+    .panel-heading p { color: var(--muted); margin: 7px 0 0; font-size: 12px; line-height: 1.6; }
+
+    .section-tag {
+      color: var(--blue);
+      background: #edf1ff;
+      border-radius: 7px;
+      padding: 7px 10px;
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 19px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 750;
+      margin-bottom: 8px;
+    }
+
+    input, select {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid #dce2ed;
+      border-radius: 8px;
+      background: white;
+      color: var(--navy);
+      font-size: 13px;
+      outline-color: var(--blue);
+    }
+
+    input::placeholder { color: #a2aabb; }
+    .full { grid-column: 1 / -1; }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .secondary-btn {
+      background: #edf1f8;
+      color: #34415c;
+    }
+
+    .secondary-btn:hover { background: #e0e6f1; }
+
+    .notice {
+      margin-top: 18px;
+      padding: 13px 15px;
+      border-radius: 9px;
+      background: #f0f4ff;
+      color: #294bc3;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .notice strong { display: block; margin-bottom: 3px; }
+
+    #message {
+      display: none;
+      margin: 15px 0 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    #message.show { display: block; }
+    #message.success { background: #eaf8f0; color: #167447; }
+    #message.error { background: #fff0f0; color: #b42323; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(140px, 190px);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .search-box { position: relative; }
+    .search-box input { padding-left: 38px; }
+    .search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8b96aa;
+      pointer-events: none;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid #edf0f6;
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    th, td {
+      padding: 15px 13px;
+      border-bottom: 1px solid #edf0f6;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8f9fc;
+      color: #778198;
+      font-size: 10px;
+      letter-spacing: .8px;
+      font-weight: 800;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafbff; }
+
+    .person {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 35px;
+      height: 35px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #365cf5;
+      background: #edf1ff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .person-name { font-weight: 750; color: var(--navy); }
+    .person-label { color: #929bad; font-size: 10px; margin-top: 4px; }
+
+    .floor-badge, .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .floor-badge { background: #edf1ff; color: #365cf5; }
+    .status-badge.active { background: #e8f8ef; color: #167447; }
+    .status-badge.inactive { background: #f0f1f5; color: #687185; }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .action-group { display: flex; gap: 7px; }
+
+    .edit-btn, .delete-btn {
+      padding: 8px 10px;
+      font-size: 11px;
+    }
+
+    .edit-btn { background: #edf1ff; color: #365cf5; }
+    .edit-btn:hover { background: #dfe6ff; }
+
+    .delete-btn {
+      background: #fff0f0;
+      color: #b42323;
+    }
+
+    .delete-btn:hover { background: #ffe0e0; }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 35px 15px;
+      white-space: normal;
+      line-height: 1.7;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 15px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .floor-overview {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .floor-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 17px;
+    }
+
+    .floor-card h4 { margin: 0; font-size: 12px; }
+    .floor-card strong { display: block; font-size: 25px; margin-top: 12px; }
+    .floor-card p { color: var(--muted); margin: 5px 0 0; font-size: 11px; }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #939caf;
+      font-size: 11px;
+    }
+
+    @media (max-width: 850px) {
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .floor-overview { grid-template-columns: 1fr; }
+      main { width: 92%; }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 18px 4%; align-items: flex-start; flex-direction: column; }
+      main { margin-top: 25px; }
+      .topline { align-items: flex-start; flex-direction: column; }
+      .summary { gap: 10px; }
+      .summary-card { padding: 16px; }
+      .summary-card strong { font-size: 26px; }
+      .panel { padding: 17px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .toolbar { grid-template-columns: 1fr; }
+      .panel-heading { flex-direction: column; }
+      .action-group { flex-direction: column; }
+      th, td { padding: 12px 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">Q</div>
+      <div>
+        <h1>QueueFlow</h1>
+        <p>Queue Management System</p>
+      </div>
+    </div>
+    <div class="role">ADMIN · STAFF SETUP</div>
+  </header>
+
+  <main>
+    <div class="topline">
+      <div>
+        <div class="eyebrow">ADMINISTRATION / STAFF</div>
+        <h2>Teller & Counter Management</h2>
+        <p class="intro">Manage teller assignments, service counters, and floor allocation.</p>
+      </div>
+      <a class="back-link" href="admin.html">← Back to Dashboard</a>
+    </div>
+
+    <section class="summary" aria-label="Teller assignment summary">
+      <div class="summary-card">
+        <span>Total Assignments</span>
+        <strong id="totalStaff">0</strong>
+        <small>All registered tellers</small>
+      </div>
+      <div class="summary-card">
+        <span>Active Tellers</span>
+        <strong id="activeStaff">0</strong>
+        <small>Currently marked active</small>
+      </div>
+      <div class="summary-card">
+        <span>Ground Floor</span>
+        <strong id="countG">0</strong>
+        <small id="activeG">0 active assignments</small>
+      </div>
+      <div class="summary-card">
+        <span>2nd & 3rd Floors</span>
+        <strong id="upperFloors">0</strong>
+        <small id="upperActive">0 active assignments</small>
+      </div>
+    </section>
+
+    <section class="floor-overview" aria-label="Floor assignment overview">
+      <div class="floor-card">
+        <h4>Ground Floor · G</h4>
+        <strong id="floorGTotal">0</strong>
+        <p id="floorGActive">0 active assignments</p>
+      </div>
+      <div class="floor-card">
+        <h4>2nd Floor · 2</h4>
+        <strong id="floor2Total">0</strong>
+        <p id="floor2Active">0 active assignments</p>
+      </div>
+      <div class="floor-card">
+        <h4>3rd Floor · 3</h4>
+        <strong id="floor3Total">0</strong>
+        <p id="floor3Active">0 active assignments</p>
+      </div>
+    </section>
+
+    <section class="panel" id="formPanel">
+      <div class="panel-heading">
+        <div>
+          <h3 id="formTitle">Register Teller Assignment</h3>
+          <p>Add a staff member and assign a service counter and floor.</p>
+        </div>
+        <span class="section-tag" id="formTag">NEW ASSIGNMENT</span>
+      </div>
+
+      <form id="staffForm">
+        <div class="form-grid">
+          <div>
+            <label for="tellerName">Teller Full Name *</label>
+            <input id="tellerName" name="tellerName"
+              placeholder="e.g. Juan Dela Cruz"
+              maxlength="80" autocomplete="name" required>
+          </div>
+
+          <div>
+            <label for="counterName">Counter Number / Name *</label>
+            <input id="counterName" name="counterName"
+              placeholder="e.g. Counter 1"
+              maxlength="40" required>
+          </div>
+
+          <div>
+            <label for="floor">Assigned Floor *</label>
+            <select id="floor" name="floor" required>
+              <option value="G">Ground Floor</option>
+              <option value="2">2nd Floor</option>
+              <option value="3">3rd Floor</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="status">Assignment Status</label>
+            <select id="status" name="status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div class="full form-actions">
+            <button type="submit" id="submitBtn">＋ Add Teller Assignment</button>
+            <button type="button" class="secondary-btn" id="cancelEditBtn" hidden>
+              Cancel Edit
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <div class="notice">
+        <strong>Prototype storage notice</strong>
+        Assignments are saved in this browser using localStorage. This page does not create
+        staff login accounts or passwords, and the records are not automatically shared
+        across different computers or browser profiles.
+      </div>
+
+      <p id="message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h3>Registered Teller Assignments</h3>
+          <p>Search, review, edit, or remove existing assignments.</p>
+        </div>
+        <span class="section-tag" id="recordTag">0 RECORDS</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search"
+            placeholder="Search teller or counter..." aria-label="Search teller assignments">
+        </div>
+
+        <select id="floorFilter" aria-label="Filter by floor">
+          <option value="all">All Floors</option>
+          <option value="G">Ground Floor</option>
+          <option value="2">2nd Floor</option>
+          <option value="3">3rd Floor</option>
+        </select>
+
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="all">All Statuses</option>
+          <option value="Active">Active Only</option>
+          <option value="Inactive">Inactive Only</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>TELLER</th>
+              <th>COUNTER</th>
+              <th>ASSIGNED FLOOR</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="staffList"></tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="tableCount">Showing 0 assignments</span>
+        <button type="button" class="secondary-btn" id="clearFiltersBtn">
+          Clear Filters
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer>QueueFlow · Teller & Counter Management</footer>
+
+  <script>
+    "use strict";
+
+    const STAFF_KEY = "qmsStaffV1";
+
+    const floorNames = {
+      G: "Ground Floor",
+      "2": "2nd Floor",
+      "3": "3rd Floor"
+    };
+
+    const form = document.getElementById("staffForm");
+    const nameInput = document.getElementById("tellerName");
+    const counterInput = document.getElementById("counterName");
+    const floorInput = document.getElementById("floor");
+    const statusInput = document.getElementById("status");
+    const staffList = document.getElementById("staffList");
+    const messageElement = document.getElementById("message");
+
+    let staff = loadStaff();
+    let editingId = null;
+    let messageTimer = null;
+
+    function loadStaff() {
+      try {
+        const raw = localStorage.getItem(STAFF_KEY);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+          .filter(person =>
+            person &&
+            typeof person === "object" &&
+            typeof person.id === "string"
+          )
+          .map(person => ({
+            id: person.id,
+            name: String(person.name || ""),
+            counter: String(person.counter || ""),
+            floor: ["G", "2", "3"].includes(String(person.floor))
+              ? String(person.floor) : "G",
+            status: person.status === "Inactive" ? "Inactive" : "Active"
+          }));
+      } catch (error) {
+        console.error("Unable to load teller assignments:", error);
+        return [];
+      }
+    }
+
+    function saveStaff(nextStaff) {
+      try {
+        localStorage.setItem(STAFF_KEY, JSON.stringify(nextStaff));
+        staff = nextStaff;
+        return true;
+      } catch (error) {
+        console.error("Unable to save teller assignments:", error);
+        showMessage(
+          "Unable to save changes. Check browser storage settings or available storage space.",
+          true
+        );
+        return false;
+      }
+    }
+
+    function showMessage(message, isError = false) {
+      clearTimeout(messageTimer);
+      messageElement.textContent = message;
+      messageElement.className = "show " + (isError ? "error" : "success");
+
+      messageTimer = setTimeout(() => {
+        messageElement.className = "";
+        messageElement.textContent = "";
+      }, 5000);
+    }
+
+    function makeCell(row, value) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+      return cell;
+    }
+
+    function initials(name) {
+      return String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join("") || "T";
+    }
+
+    function renderSummary() {
+      const active = staff.filter(person => person.status === "Active");
+      const ground = staff.filter(person => person.floor === "G");
+      const second = staff.filter(person => person.floor === "2");
+      const third = staff.filter(person => person.floor === "3");
+      const upper = [...second, ...third];
+
+      document.getElementById("totalStaff").textContent = staff.length;
+      document.getElementById("activeStaff").textContent = active.length;
+      document.getElementById("countG").textContent = ground.length;
+      document.getElementById("activeG").textContent =
+        ground.filter(person => person.status === "Active").length +
+        " active assignments";
+
+      document.getElementById("upperFloors").textContent = upper.length;
+      document.getElementById("upperActive").textContent =
+        upper.filter(person => person.status === "Active").length +
+        " active assignments";
+
+      document.getElementById("floorGTotal").textContent = ground.length;
+      document.getElementById("floorGActive").textContent =
+        ground.filter(person => person.status === "Active").length +
+        " active assignments";
+
+      document.getElementById("floor2Total").textContent = second.length;
+      document.getElementById("floor2Active").textContent =
+        second.filter(person => person.status === "Active").length +
+        " active assignments";
+
+      document.getElementById("floor3Total").textContent = third.length;
+      document.getElementById("floor3Active").textContent =
+        third.filter(person => person.status === "Active").length +
+        " active assignments";
+
+      document.getElementById("recordTag").textContent =
+        staff.length + (staff.length === 1 ? " RECORD" : " RECORDS");
+    }
+
+    function renderTable() {
+      const query = document.getElementById("searchInput")
+        .value.trim().toLowerCase();
+      const selectedFloor = document.getElementById("floorFilter").value;
+      const selectedStatus = document.getElementById("statusFilter").value;
+
+      const filtered = staff.filter(person => {
+        const matchesSearch =
+          person.name.toLowerCase().includes(query) ||
+          person.counter.toLowerCase().includes(query);
+
+        const matchesFloor =
+          selectedFloor === "all" || person.floor === selectedFloor;
+
+        const matchesStatus =
+          selectedStatus === "all" || person.status === selectedStatus;
+
+        return matchesSearch && matchesFloor && matchesStatus;
+      });
+
+      staffList.replaceChildren();
+
+      if (filtered.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = 5;
+        cell.className = "empty";
+        cell.textContent = staff.length === 0
+          ? "No teller assignments yet. Register a teller using the form above."
+          : "No assignments match your search or filters.";
+        row.appendChild(cell);
+        staffList.appendChild(row);
+      } else {
+        filtered.forEach(person => {
+          const row = document.createElement("tr");
+
+          const tellerCell = document.createElement("td");
+          const personBox = document.createElement("div");
+          personBox.className = "person";
+
+          const avatar = document.createElement("div");
+          avatar.className = "avatar";
+          avatar.textContent = initials(person.name);
+
+          const details = document.createElement("div");
+          const personName = document.createElement("div");
+          personName.className = "person-name";
+          personName.textContent = person.name;
+
+          const personLabel = document.createElement("div");
+          personLabel.className = "person-label";
+          personLabel.textContent = "Teller assignment";
+
+          details.append(personName, personLabel);
+          personBox.append(avatar, details);
+          tellerCell.appendChild(personBox);
+          row.appendChild(tellerCell);
+
+          makeCell(row, person.counter);
+
+          const floorCell = document.createElement("td");
+          const floorBadge = document.createElement("span");
+          floorBadge.className = "floor-badge";
+          floorBadge.textContent = floorNames[person.floor] || person.floor;
+          floorCell.appendChild(floorBadge);
+          row.appendChild(floorCell);
+
+          const statusCell = document.createElement("td");
+          const statusBadge = document.createElement("span");
+          statusBadge.className =
+            "status-badge " + person.status.toLowerCase();
+
+          const dot = document.createElement("span");
+          dot.className = "status-dot";
+
+          statusBadge.append(dot, document.createTextNode(person.status));
+          statusCell.appendChild(statusBadge);
+          row.appendChild(statusCell);
+
+          const actionCell = document.createElement("td");
+          const actionGroup = document.createElement("div");
+          actionGroup.className = "action-group";
+
+          const editButton = document.createElement("button");
+          editButton.type = "button";
+          editButton.className = "edit-btn";
+          editButton.textContent = "Edit";
+          editButton.setAttribute("aria-label", "Edit " + person.name);
+          editButton.addEventListener("click", () => editStaff(person.id));
+
+          const removeButton = document.createElement("button");
+          removeButton.type = "button";
+          removeButton.className = "delete-btn";
+          removeButton.textContent = "Remove";
+          removeButton.setAttribute("aria-label", "Remove " + person.name);
+          removeButton.addEventListener("click", () => removeStaff(person.id));
+
+          actionGroup.append(editButton, removeButton);
+          actionCell.appendChild(actionGroup);
+          row.appendChild(actionCell);
+
+          staffList.appendChild(row);
+        });
+      }
+
+      document.getElementById("tableCount").textContent =
+        "Showing " + filtered.length + " of " + staff.length + " assignments";
+    }
+
+    function render() {
+      renderSummary();
+      renderTable();
+    }
+
+    function resetForm() {
+      form.reset();
+      floorInput.value = "G";
+      statusInput.value = "Active";
+      editingId = null;
+
+      document.getElementById("formTitle").textContent =
+        "Register Teller Assignment";
+      document.getElementById("formTag").textContent = "NEW ASSIGNMENT";
+      document.getElementById("submitBtn").textContent =
+        "＋ Add Teller Assignment";
+      document.getElementById("cancelEditBtn").hidden = true;
+    }
+
+    function editStaff(id) {
+      const person = staff.find(item => item.id === id);
+      if (!person) {
+        showMessage("This assignment could not be found.", true);
+        return;
+      }
+
+      editingId = id;
+      nameInput.value = person.name;
+      counterInput.value = person.counter;
+      floorInput.value = person.floor;
+      statusInput.value = person.status;
+
+      document.getElementById("formTitle").textContent =
+        "Edit Teller Assignment";
+      document.getElementById("formTag").textContent = "EDITING RECORD";
+      document.getElementById("submitBtn").textContent = "Save Changes";
+      document.getElementById("cancelEditBtn").hidden = false;
+
+      document.getElementById("formPanel").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+      nameInput.focus({ preventScroll: true });
+    }
+
+    function removeStaff(id) {
+      const person = staff.find(item => item.id === id);
+      if (!person) return;
+
+      const confirmed = confirm(
+        "Remove the assignment for " + person.name +
+        " (" + person.counter + ")? This cannot be undone."
+      );
+
+      if (!confirmed) return;
+
+      const nextStaff = staff.filter(item => item.id !== id);
+
+      if (!saveStaff(nextStaff)) return;
+
+      if (editingId === id) resetForm();
+
+      render();
+      showMessage("Teller assignment removed successfully.");
+    }
+
+    function isDuplicateCounter(counter, floor, ignoredId = null) {
+      const normalizedCounter = counter.trim().toLowerCase();
+
+      return staff.some(person =>
+        person.id !== ignoredId &&
+        person.floor === floor &&
+        person.counter.trim().toLowerCase() === normalizedCounter
+      );
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const name = nameInput.value.trim();
+      const counter = counterInput.value.trim();
+      const floor = floorInput.value;
+      const status = statusInput.value;
+
+      if (!name || !counter) {
+        showMessage("Please complete all required fields.", true);
+        return;
+      }
+
+      if (!["G", "2", "3"].includes(floor)) {
+        showMessage("Please select a valid floor.", true);
+        return;
+      }
+
+      if (!["Active", "Inactive"].includes(status)) {
+        showMessage("Please select a valid assignment status.", true);
+        return;
+      }
+
+      if (isDuplicateCounter(counter, floor, editingId)) {
+        showMessage(
+          "This counter is already registered on the selected floor. Choose another counter.",
+          true
+        );
+        return;
+      }
+
+      if (editingId !== null) {
+        const exists = staff.some(person => person.id === editingId);
+        if (!exists) {
+          showMessage("The assignment no longer exists. Please refresh and try again.", true);
+          resetForm();
+          return;
+        }
+
+        const nextStaff = staff.map(person =>
+          person.id === editingId
+            ? { ...person, name, counter, floor, status }
+            : person
+        );
+
+        if (!saveStaff(nextStaff)) return;
+
+        resetForm();
+        render();
+        showMessage("Teller assignment updated successfully.");
+      } else {
+        const newPerson = {
+          id: (window.crypto && typeof window.crypto.randomUUID === "function")
+            ? window.crypto.randomUUID()
+            : Date.now() + "-" + Math.random().toString(16).slice(2),
+          name,
+          counter,
+          floor,
+          status
+        };
+
+        if (!saveStaff([...staff, newPerson])) return;
+
+        resetForm();
+        render();
+        showMessage("Teller assignment added successfully.");
+      }
+    });
+
+    document.getElementById("cancelEditBtn").addEventListener("click", () => {
+      resetForm();
+      showMessage("Edit cancelled.");
+    });
+
+    document.getElementById("searchInput").addEventListener("input", renderTable);
+    document.getElementById("floorFilter").addEventListener("change", renderTable);
+    document.getElementById("statusFilter").addEventListener("change", renderTable);
+
+    document.getElementById("clearFiltersBtn").addEventListener("click", () => {
+      document.getElementById("searchInput").value = "";
+      document.getElementById("floorFilter").value = "all";
+      document.getElementById("statusFilter").value = "all";
+      renderTable();
+    });
+
+    window.addEventListener("storage", event => {
+      if (event.key === STAFF_KEY || event.key === null) {
+        staff = loadStaff();
+
+        if (editingId && !staff.some(person => person.id === editingId)) {
+          resetForm();
+        }
+
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
+```

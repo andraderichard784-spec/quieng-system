@@ -1,0 +1,623 @@
+
+/* ==========================================
+   QUEUEFLOW — PROFESSIONAL UI DESIGN
+   Original layout + smooth animations
+   ========================================== */
+
+:root {
+  --navy: #101b35;
+  --blue: #4569e8;
+  --bg: #f4f6fb;
+  --text: #1c2740;
+  --muted: #7d879d;
+  --border: #e8ebf3;
+
+  --primary-dark: #3454cb;
+  --surface: #ffffff;
+  --success: #258d68;
+  --radius: 15px;
+  --shadow: 0 5px 20px rgba(28, 39, 64, 0.05);
+  --shadow-hover: 0 14px 34px rgba(25, 42, 80, 0.11);
+  --transition: 0.25s ease;
+}
+
+/* RESET */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ==========================================
+   SIDEBAR
+   ========================================== */
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 245px;
+  padding: 30px 20px;
+  background: var(--navy);
+  color: white;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 5px 0 25px rgba(16, 27, 53, 0.06);
+}
+
+.sidebar h2 {
+  font-size: 23px;
+  letter-spacing: 1px;
+}
+
+.sidebar h2 span {
+  color: #829aff;
+}
+
+.menu-label,
+.eyebrow {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.menu-label {
+  margin: 42px 10px 15px;
+  color: #8d9ab5;
+}
+
+.sidebar a {
+  display: block;
+  padding: 14px 12px;
+  margin: 7px 0;
+  color: #b8c3dc;
+  text-decoration: none;
+  border-radius: 9px;
+  font-size: 13px;
+  transition:
+    color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.sidebar a:hover {
+  color: white;
+  background: #29395d;
+  transform: translateX(3px);
+}
+
+.sidebar a.active {
+  color: white;
+  background: #29395d;
+  box-shadow: inset 3px 0 #829aff;
+}
+
+.sidebar-bottom {
+  position: absolute;
+  bottom: 28px;
+  font-size: 10px;
+  line-height: 2;
+  color: #a9b5cf;
+}
+
+/* ==========================================
+   MAIN LAYOUT
+   ========================================== */
+
+.main {
+  margin-left: 245px;
+  padding: 35px;
+  max-width: 1800px;
+  min-height: 100vh;
+}
+
+header,
+.queue-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+h1 {
+  margin: 9px 0;
+  font-size: 30px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+h2 {
+  margin-top: 8px;
+}
+
+.muted,
+.stat small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.admin {
+  background: white;
+  padding: 13px 17px;
+  border-radius: 10px;
+  color: #36a879;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.admin span {
+  color: var(--text);
+  margin-left: 5px;
+}
+
+/* ==========================================
+   DASHBOARD STATISTICS
+   ========================================== */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+  margin: 30px 0;
+}
+
+.stat,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 23px;
+  box-shadow: var(--shadow);
+  transition:
+    box-shadow var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.stat:hover,
+.panel:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: #d8e1ff;
+  transform: translateY(-2px);
+}
+
+.stat p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stat h2 {
+  margin: 15px 0 7px;
+  font-size: 30px;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+}
+
+/* ==========================================
+   CONTENT PANELS
+   ========================================== */
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.current {
+  background: linear-gradient(145deg, #101b35, #1a2c50);
+  color: white;
+  border-color: #24375c;
+}
+
+.current .eyebrow {
+  color: #aab9ed;
+}
+
+.current h2 {
+  font-size: 52px;
+  margin: 15px 0 5px;
+  letter-spacing: -1px;
+}
+
+.current p:not(.eyebrow) {
+  color: #c0c9dd;
+  font-size: 13px;
+}
+
+.divider {
+  height: 1px;
+  background: #ffffff20;
+  margin: 25px 0;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+button {
+  width: 100%;
+  border: 0;
+  padding: 13px 16px;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: white;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    box-shadow var(--transition),
+    transform 0.15s ease,
+    filter var(--transition);
+}
+
+button:hover {
+  background: var(--primary-dark);
+  box-shadow: 0 5px 15px rgba(69, 105, 232, 0.2);
+}
+
+button:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+button.secondary {
+  background: #29395d;
+}
+
+button.secondary:hover {
+  background: #354970;
+}
+
+/* ==========================================
+   FORMS
+   ========================================== */
+
+label {
+  display: block;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #cbd4e8;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(69, 105, 232, 0.11);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #a4adbf;
+}
+
+#notice {
+  font-size: 12px;
+  color: var(--success);
+  line-height: 1.6;
+}
+
+/* ==========================================
+   QUEUE TABLE
+   ========================================== */
+
+.queue-panel {
+  margin-top: 22px;
+}
+
+.queue-heading h2 {
+  margin-bottom: 0;
+}
+
+.live {
+  color: var(--success);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 9px;
+}
+
+table {
+  width: 100%;
+  margin-top: 25px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 800;
+  background: #f9faff;
+}
+
+td,
+th {
+  padding: 15px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+tbody tr {
+  transition: background var(--transition);
+}
+
+tbody tr:hover {
+  background: #f5f7ff;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 30px;
+}
+
+/* ==========================================
+   STATUS BADGES
+   ========================================== */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #fff3d9;
+  color: #9a6a12;
+  white-space: nowrap;
+}
+
+.status.serving {
+  background: #e5edff;
+  color: #365bce;
+}
+
+.status.completed {
+  background: #ddf6e9;
+  color: #18794e;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+footer {
+  padding: 25px 0;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes qf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes qf-number-enter {
+  from {
+    opacity: 0.4;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main {
+  animation: qf-fade-up 0.4s ease-out both;
+}
+
+.stats > *,
+.content-grid > *,
+.queue-panel {
+  animation: qf-fade-up 0.45s ease-out both;
+}
+
+.stats > *:nth-child(2) {
+  animation-delay: 0.05s;
+}
+
+.stats > *:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+.stats > *:nth-child(4) {
+  animation-delay: 0.15s;
+}
+
+.content-grid > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.queue-number,
+.ticket-number,
+.current-number {
+  animation: qf-number-enter 0.35s ease-out;
+}
+
+/* ==========================================
+   ACCESSIBILITY
+   ========================================== */
+
+:focus-visible {
+  outline: 3px solid rgba(69, 105, 232, 0.4);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE TABLET
+   ========================================== */
+
+@media (max-width: 1100px) {
+  .sidebar {
+    width: 210px;
+  }
+
+  .main {
+    margin-left: 210px;
+    padding: 25px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE MOBILE
+   ========================================== */
+
+@media (max-width: 600px) {
+  .sidebar {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding: 12px 18px;
+  }
+
+  .sidebar h2 {
+    margin: 5px 0;
+  }
+
+  .menu-label,
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .sidebar a {
+    display: inline-block;
+    padding: 10px;
+    margin: 4px 2px;
+    font-size: 11px;
+  }
+
+  .sidebar a:hover {
+    transform: none;
+  }
+
+  .main {
+    margin: 0;
+    padding: 16px;
+    min-height: auto;
+  }
+
+  header {
+    align-items: flex-start;
+  }
+
+  .admin {
+    display: none;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  .stat,
+  .panel {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .stat h2 {
+    font-size: 25px;
+  }
+
+  .content-grid {
+    gap: 14px;
+  }
+
+  .current h2 {
+    font-size: 42px;
+  }
+
+  .queue-panel {
+    margin-top: 16px;
+  }
+
+  td,
+  th {
+    padding: 12px 8px;
+    font-size: 11px;
+  }
+}

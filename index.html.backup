@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queue Management System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>QUEUE<span>FLOW</span></h2>
+    <p class="menu-label">MAIN MENU</p>
+    <a class="active" href="#">▦ Dashboard</a>
+    <a href="#queue">☷ Queue Management</a>
+    <a href="#register">＋ Register Customer</a>
+    <div class="sidebar-bottom">QUEUE MANAGEMENT SYSTEM<br><small>Admin Panel · v1.0</small></div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <div>
+        <p class="eyebrow">WORKSPACE / OVERVIEW</p>
+        <h1>Dashboard</h1>
+        <p class="muted">Monitor and manage your queues in real time.</p>
+      </div>
+      <div class="admin">● <span>Administrator</span></div>
+    </header>
+
+    <section class="stats">
+      <article class="stat">
+        <p>Total Customers Today</p>
+        <h2 id="total">0</h2>
+        <small>Registered today</small>
+      </article>
+      <article class="stat">
+        <p>Waiting in Queue</p>
+        <h2 id="waiting">0</h2>
+        <small>Awaiting service</small>
+      </article>
+      <article class="stat">
+        <p>Currently Serving</p>
+        <h2 id="servingCount">0</h2>
+        <small>Now being attended</small>
+      </article>
+      <article class="stat">
+        <p>Completed</p>
+        <h2 id="completed">0</h2>
+        <small>Service completed</small>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel current">
+        <p class="eyebrow">NOW SERVING</p>
+        <h2 id="currentNumber">---</h2>
+        <p id="currentName">No customer is being served</p>
+        <div class="divider"></div>
+        <button id="nextBtn">Call Next Customer →</button>
+        <button id="completeBtn" class="secondary">Complete Current</button>
+      </article>
+
+      <article class="panel" id="register">
+        <p class="eyebrow">NEW REGISTRATION</p>
+        <h2>Register Customer</h2>
+        <form id="queueForm">
+          <label for="customerName">Customer name</label>
+          <input id="customerName" placeholder="Enter full name" required maxlength="80">
+          <label for="service">Select service</label>
+          <select id="service">
+            <option value="General Inquiry">General Inquiry</option>
+            <option value="Customer Service">Customer Service</option>
+            <option value="Payments">Payments</option>
+            <option value="Technical Support">Technical Support</option>
+          </select>
+          <button type="submit">＋ Get Queue Number</button>
+        </form>
+        <p id="notice" aria-live="polite"></p>
+      </article>
+    </section>
+
+    <section class="panel queue-panel" id="queue">
+      <div class="queue-heading">
+        <div>
+          <p class="eyebrow">LIVE OVERVIEW</p>
+          <h2>Customer Queue</h2>
+        </div>
+        <span class="live">● LOCAL DEMO</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>QUEUE NO.</th>
+              <th>CUSTOMER</th>
+              <th>SERVICE</th>
+              <th>STATUS</th>
+            </tr>
+          </thead>
+          <tbody id="queueTable">
+            <tr><td colspan="4" class="empty">No customers registered yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer>QueueFlow · Queue Management System</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>

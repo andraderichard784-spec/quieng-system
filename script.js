@@ -1,0 +1,181 @@
+const API = "/api/queue";
+
+const $ = (id) => document.getElementById(id);
+
+let customers = [];
+let currentCustomer = null;
+
+async function request(url, options = {}) {
+const response = await fetch(url, {
+headers: { "Content-Type": "application/json" },
+...options
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+throw new Error(data.error || "Something went wrong.");
+}
+
+return data;
+}
+
+function announceCustomer(customer) {
+if (!("speechSynthesis" in window) || !customer) return;
+
+window.speechSynthesis.cancel();
+
+const message =
+`Now serving queue number ${customer.number}. ` +
+`Customer ${customer.name}, please proceed for ${customer.service}.`;
+
+const speech = new SpeechSynthesisUtterance(message);
+speech.lang = "en-US";
+speech.rate = 0.9;
+speech.pitch = 1;
+speech.volume = 1;
+
+window.speechSynthesis.speak(speech);
+}
+
+async function render() {
+try {
+const data = await request(API);
+
+customers = data.customers || [];
+currentCustomer = data.currentCustomer || null;
+
+$("total").textContent = customers.length;
+
+$("waiting").textContent = customers.filter(
+  customer => customer.status === "Waiting"
+).length;
+
+$("servingCount").textContent = currentCustomer ? 1 : 0;
+
+$("completed").textContent = customers.filter(
+  customer => customer.status === "Completed"
+).length;
+
+$("currentNumber").textContent =
+  currentCustomer ? currentCustomer.number : "---";
+
+$("currentName").textContent = currentCustomer
+  ? `${currentCustomer.name} - ${currentCustomer.service}`
+  : "No customer is being served";
+
+const tbody = $("queueTable");
+tbody.replaceChildren();
+
+if (customers.length === 0) {
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+
+  cell.colSpan = 4;
+  cell.className = "empty";
+  cell.textContent = "No customers registered yet.";
+
+  row.appendChild(cell);
+  tbody.appendChild(row);
+  return;
+}
+
+[...customers].reverse().forEach(customer => {
+  const row = document.createElement("tr");
+
+  [customer.number, customer.name, customer.service].forEach(value => {
+    const cell = document.createElement("td");
+    cell.textContent = value ?? "";
+    row.appendChild(cell);
+  });
+
+  const statusCell = document.createElement("td");
+  const badge = document.createElement("span");
+
+  badge.className = "status";
+
+  if (customer.status === "Serving") {
+    badge.classList.add("serving");
+  }
+
+  if (customer.status === "Completed") {
+    badge.classList.add("completed");
+  }
+
+  badge.textContent = customer.status || "Waiting";
+  statusCell.appendChild(badge);
+  row.appendChild(statusCell);
+  tbody.appendChild(row);
+});
+
+} catch (error) {
+console.error("Queue refresh failed:", error);
+
+const notice = $("notice");
+if (notice) {
+  notice.textContent =
+    "Unable to load queue. Please start the server and try again.";
+}
+
+}
+}
+
+$("queueForm").addEventListener("submit", async event => {
+event.preventDefault();
+
+const name = $("customerName").value.trim();
+const service = $("service").value;
+
+if (!name) return;
+
+try {
+const data = await request(API, {
+method: "POST",
+body: JSON.stringify({ name, service })
+});
+
+$("notice").textContent =
+  `Customer registered successfully: ${data.customer.number}`;
+
+$("queueForm").reset();
+await render();
+
+} catch (error) {
+$("notice").textContent = error.message;
+}
+});
+
+$("nextBtn").addEventListener("click", async () => {
+try {
+const data = await request(`${API}/next`, {
+method: "POST",
+body: JSON.stringify({})
+});
+
+$("notice").textContent = data.message || "Next customer called.";
+
+
+await render();
+
+} catch (error) {
+$("notice").textContent = error.message;
+}
+});
+
+$("completeBtn").addEventListener("click", async () => {
+try {
+const data = await request(`${API}/complete`, {
+method: "POST",
+body: JSON.stringify({})
+});
+
+$("notice").textContent = data.message || "Service completed.";
+await render();
+
+} catch (error) {
+$("notice").textContent = error.message;
+}
+});
+
+render();
+setInterval(render, 2000);

@@ -1,0 +1,750 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QueueFlow | Customer Kiosk</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f3f6fc;
+      color: #101b35;
+    }
+
+    header {
+      background: #101b35;
+      color: white;
+      padding: 22px 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    header h1 { margin: 0; font-size: 24px; }
+    header p { margin: 5px 0 0; color: #bdc9e0; font-size: 12px; }
+
+    .role {
+      color: #8af0b8;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    main {
+      width: min(900px, 92%);
+      margin: 40px auto;
+    }
+
+    .heading { text-align: center; margin-bottom: 30px; }
+
+    .eyebrow {
+      color: #365cf5;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    h2 { font-size: clamp(28px, 5vw, 40px); margin: 12px 0; }
+
+    .subtitle {
+      color: #778198;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid #e3e8f2;
+      border-radius: 17px;
+      padding: 28px;
+      box-shadow: 0 8px 28px #15264b0b;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 20px 0 9px;
+    }
+
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #dce2ed;
+      border-radius: 9px;
+      font: inherit;
+      font-size: 14px;
+      background: white;
+      color: #101b35;
+    }
+
+    select:focus {
+      outline: 2px solid #365cf5;
+      outline-offset: 2px;
+    }
+
+    .description {
+      background: #f6f8ff;
+      border: 1px solid #e8ecff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 18px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #778198;
+      min-height: 58px;
+    }
+
+    .description strong { color: #101b35; }
+
+    button {
+      border: 0;
+      border-radius: 9px;
+      padding: 15px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .primary-btn {
+      width: 100%;
+      margin-top: 20px;
+      background: #365cf5;
+      color: white;
+      font-size: 14px;
+    }
+
+    .primary-btn:hover:not(:disabled) { background: #2448db; }
+
+    .secondary-btn {
+      background: #edf1ff;
+      color: #365cf5;
+      font-size: 12px;
+      padding: 10px 12px;
+    }
+
+    .service-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 5px;
+    }
+
+    .service-heading label { margin-top: 20px; }
+
+    .message {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #778198;
+      margin-top: 15px;
+    }
+
+    .ticket-result {
+      display: none;
+      margin-top: 25px;
+      padding: 28px 20px;
+      text-align: center;
+      background: white;
+      border: 2px dashed #365cf5;
+      border-radius: 16px;
+    }
+
+    .ticket-result.show { display: block; }
+
+    .ticket-number {
+      color: #365cf5;
+      font-size: clamp(42px, 9vw, 62px);
+      font-weight: 900;
+      margin: 15px 0;
+      overflow-wrap: anywhere;
+    }
+
+    .ticket-detail {
+      line-height: 1.8;
+      font-size: 13px;
+      color: #778198;
+    }
+
+    .ticket-detail strong { color: #101b35; }
+
+    #ticketStatus {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: #fff1c7;
+      color: #865b00;
+    }
+
+    #ticketStatus.serving {
+      background: #d9fbe8;
+      color: #087443;
+    }
+
+    #ticketStatus.completed {
+      background: #e8edf5;
+      color: #536078;
+    }
+
+    .print-btn {
+      margin-top: 20px;
+      background: #101b35;
+      color: white;
+      padding: 12px 20px;
+    }
+
+    footer {
+      padding: 25px;
+      text-align: center;
+      color: #939caf;
+      font-size: 11px;
+    }
+
+    @media (max-width: 550px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .panel { padding: 20px; }
+      .service-heading { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+
+      #ticketResult, #ticketResult * {
+        visibility: visible;
+      }
+
+      #ticketResult {
+        display: block;
+        position: absolute;
+        inset: 0;
+        border: 0;
+        color: black;
+        box-shadow: none;
+      }
+
+      .print-btn { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>QueueFlow</h1>
+      <p>Customer Queue Ticket System</p>
+    </div>
+    <div class="role">● CUSTOMER KIOSK</div>
+  </header>
+
+  <main>
+    <section class="heading">
+      <div class="eyebrow">WELCOME</div>
+      <h2>Get Your Queue Number</h2>
+      <p class="subtitle">
+        Select your destination and service below.<br>
+        Please keep your ticket and wait for your number to be called.
+      </p>
+    </section>
+
+    <section class="panel">
+      <label for="floorSelect">1. Select Floor</label>
+      <select id="floorSelect">
+        <option value="G">Ground Floor</option>
+        <option value="2">2nd Floor</option>
+        <option value="3">3rd Floor</option>
+      </select>
+
+      <div class="service-heading">
+        <label for="serviceSelect">2. Select Service</label>
+        <button type="button" class="secondary-btn" id="refreshServices">
+          ↻ Refresh Services
+        </button>
+      </div>
+
+      <select id="serviceSelect">
+        <option value="">Loading services...</option>
+      </select>
+
+      <div class="description" id="serviceDescription">
+        Select a service to view its description.
+      </div>
+
+      <button type="button" class="primary-btn" id="issueBtn" disabled>
+        GET QUEUE TICKET
+      </button>
+
+      <p class="message" id="message" role="status" aria-live="polite">
+        Choose a floor and an active service to continue.
+      </p>
+    </section>
+
+    <section class="ticket-result" id="ticketResult">
+      <div class="eyebrow">YOUR TICKET</div>
+      <h2>Ticket Issued Successfully</h2>
+
+      <div class="ticket-number" id="ticketNumber">G-001</div>
+
+      <div class="ticket-detail">
+        Floor: <strong id="ticketFloor"></strong><br>
+        Service: <strong id="ticketService"></strong><br>
+        Status: <strong id="ticketStatus">Waiting</strong>
+      </div>
+
+      <button type="button" class="print-btn" id="printBtn">
+        PRINT TICKET
+      </button>
+    </section>
+  </main>
+
+  <footer>QueueFlow · Customer Kiosk</footer>
+
+  <script>
+    "use strict";
+
+    const QUEUE_KEY = "qmsDataV1";
+    const SERVICE_KEY = "qmsServicesV1";
+
+    const floors = {
+      G: { name: "Ground Floor" },
+      "2": { name: "2nd Floor" },
+      "3": { name: "3rd Floor" }
+    };
+
+    const floorSelect = document.getElementById("floorSelect");
+    const serviceSelect = document.getElementById("serviceSelect");
+    const issueBtn = document.getElementById("issueBtn");
+    const message = document.getElementById("message");
+    const description = document.getElementById("serviceDescription");
+    const ticketResult = document.getElementById("ticketResult");
+    const ticketStatus = document.getElementById("ticketStatus");
+
+    let activeServices = [];
+    let issuedTicket = null;
+
+    function normalizeFloor(value) {
+      const floor = String(value ?? "").trim().toLowerCase();
+
+      if (["g", "ground", "ground floor", "ground-floor"].includes(floor)) {
+        return "G";
+      }
+
+      if (["2", "2nd", "second", "2nd floor", "second floor"].includes(floor)) {
+        return "2";
+      }
+
+      if (["3", "3rd", "third", "3rd floor", "third floor"].includes(floor)) {
+        return "3";
+      }
+
+      return String(value ?? "").trim();
+    }
+
+    function readServices() {
+      try {
+        const raw = localStorage.getItem(SERVICE_KEY);
+        const saved = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        console.error("Could not read services:", error);
+        return [];
+      }
+    }
+
+    function isServiceActive(service) {
+      return String(service?.status ?? "").trim().toLowerCase() === "active";
+    }
+
+    function serviceBelongsToFloor(service, floorKey) {
+      return normalizeFloor(service?.floor) === floorKey;
+    }
+
+    function getServiceId(service) {
+      return String(service?.id ?? "");
+    }
+
+    function getServiceLabel(service) {
+      const code = String(service?.code ?? "").trim();
+      const name = String(service?.name ?? "").trim();
+
+      return [code, name].filter(Boolean).join(" — ") || "Unnamed Service";
+    }
+
+    function showDescription(service) {
+      description.replaceChildren();
+
+      if (!service) {
+        description.textContent = "Select a service to view its description.";
+        return;
+      }
+
+      const title = document.createElement("strong");
+      title.textContent = getServiceLabel(service);
+
+      const detail = document.createElement("div");
+      detail.textContent =
+        String(service.description ?? "").trim() ||
+        "No additional description provided.";
+
+      description.append(title, detail);
+    }
+
+    function getSelectedService() {
+      const selectedId = serviceSelect.value;
+
+      if (!selectedId) return null;
+
+      return activeServices.find(
+        service => getServiceId(service) === selectedId
+      ) || null;
+    }
+
+    function loadServices(options = {}) {
+      const preserveSelection = options.preserveSelection === true;
+      const previousId = preserveSelection ? serviceSelect.value : "";
+
+      const floorKey = floorSelect.value;
+
+      activeServices = readServices().filter(service =>
+        isServiceActive(service) &&
+        serviceBelongsToFloor(service, floorKey) &&
+        getServiceId(service) !== "" &&
+        String(service.name ?? "").trim() !== "" &&
+        String(service.code ?? "").trim() !== ""
+      );
+
+      serviceSelect.replaceChildren();
+
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+
+      if (activeServices.length === 0) {
+        placeholder.textContent = "No active services for this floor";
+        serviceSelect.appendChild(placeholder);
+        serviceSelect.value = "";
+        issueBtn.disabled = true;
+
+        showDescription(null);
+        description.textContent =
+          "Please ask the administrator to add an active service for this floor.";
+
+        message.textContent =
+          `No active services found for ${floors[floorKey].name}. Check Service Management.`;
+        return;
+      }
+
+      placeholder.textContent = "Choose a service";
+      serviceSelect.appendChild(placeholder);
+
+      activeServices.forEach(service => {
+        const option = document.createElement("option");
+        option.value = getServiceId(service);
+        option.textContent = getServiceLabel(service);
+        serviceSelect.appendChild(option);
+      });
+
+      if (previousId && activeServices.some(
+        service => getServiceId(service) === previousId
+      )) {
+        serviceSelect.value = previousId;
+      } else {
+        serviceSelect.value = "";
+      }
+
+      const selected = getSelectedService();
+
+      issueBtn.disabled = !selected;
+      showDescription(selected);
+
+      message.textContent = selected
+        ? "Ready to issue your ticket."
+        : `${activeServices.length} active service(s) available on ${floors[floorKey].name}.`;
+    }
+
+    function createEmptyQueueData() {
+      return {
+        floors: {
+          G: { name: "Ground Floor", next: 1, waiting: [], serving: null },
+          "2": { name: "2nd Floor", next: 1, waiting: [], serving: null },
+          "3": { name: "3rd Floor", next: 1, waiting: [], serving: null }
+        },
+        totalIssued: 0,
+        activity: []
+      };
+    }
+
+    function readQueueData() {
+      let data;
+
+      try {
+        const raw = localStorage.getItem(QUEUE_KEY);
+        data = raw ? JSON.parse(raw) : null;
+      } catch (error) {
+        console.error("Could not read queue data:", error);
+        return null;
+      }
+
+      if (!data || typeof data !== "object" || Array.isArray(data)) {
+        return createEmptyQueueData();
+      }
+
+      if (!data.floors || typeof data.floors !== "object") {
+        data.floors = {};
+      }
+
+      const defaults = createEmptyQueueData();
+
+      for (const key of Object.keys(floors)) {
+        if (!data.floors[key] || typeof data.floors[key] !== "object") {
+          data.floors[key] = defaults.floors[key];
+        }
+
+        const floor = data.floors[key];
+
+        if (!Array.isArray(floor.waiting)) floor.waiting = [];
+
+        const nextNumber = Number(floor.next);
+        floor.next = Number.isFinite(nextNumber) && nextNumber > 0
+          ? Math.floor(nextNumber)
+          : 1;
+
+        if (!floor.name) floor.name = floors[key].name;
+
+        if (!("serving" in floor)) floor.serving = null;
+      }
+
+      if (!Array.isArray(data.activity)) data.activity = [];
+
+      const total = Number(data.totalIssued);
+      data.totalIssued = Number.isFinite(total) && total >= 0 ? total : 0;
+
+      return data;
+    }
+
+    function setTicketStatus(status) {
+      ticketStatus.textContent = status;
+
+      ticketStatus.classList.toggle(
+        "serving",
+        status.toLowerCase() === "now serving"
+      );
+
+      ticketStatus.classList.toggle(
+        "completed",
+        status.toLowerCase() === "completed"
+      );
+    }
+
+    function updateTicketStatus() {
+      if (!issuedTicket) return;
+
+      const data = readQueueData();
+      if (!data) return;
+
+      const floorKey = issuedTicket.split("-")[0];
+      const floor = data.floors[floorKey];
+
+      if (!floor) return;
+
+      let status = null;
+
+      if (floor.serving === issuedTicket) {
+        status = "Now Serving";
+      } else if (floor.waiting.includes(issuedTicket)) {
+        status = "Waiting";
+      } else {
+        const activity = data.activity.find(
+          item => item && item.ticket === issuedTicket
+        );
+
+        if (activity?.status) {
+          status = String(activity.status);
+        }
+      }
+
+      // Preserve the last known status if this ticket is no longer
+      // present in the waiting list or recent activity.
+      if (status) setTicketStatus(status);
+    }
+
+    function issueQueueTicket() {
+      issueBtn.disabled = true;
+
+      // Re-read the service list before issuing, so a service that was
+      // deactivated or removed cannot be selected from stale page data.
+      const floorKey = floorSelect.value;
+      const selectedId = serviceSelect.value;
+
+      const service = readServices().find(item =>
+        getServiceId(item) === selectedId &&
+        isServiceActive(item) &&
+        serviceBelongsToFloor(item, floorKey)
+      );
+
+      if (!service) {
+        loadServices();
+        message.textContent =
+          "The selected service is no longer active. Please select an active service.";
+        return;
+      }
+
+      if (!floors[floorKey]) {
+        message.textContent = "Invalid floor selection. Please refresh the page.";
+        loadServices();
+        return;
+      }
+
+      const data = readQueueData();
+
+      if (!data) {
+        message.textContent =
+          "Queue data could not be read. Please refresh and try again.";
+        loadServices({ preserveSelection: true });
+        return;
+      }
+
+      const floor = data.floors[floorKey];
+
+      if (!floor) {
+        message.textContent =
+          "Floor data is missing. Please refresh the page.";
+        loadServices();
+        return;
+      }
+
+      // Reconcile the next number with existing queue records to avoid
+      // reusing a ticket number if stored data is partially inconsistent.
+      const existingTickets = [
+        ...floor.waiting,
+        ...(floor.serving ? [floor.serving] : []),
+        ...data.activity
+          .filter(item => item && item.ticket)
+          .map(item => item.ticket)
+      ];
+
+      const prefix = `${floorKey}-`;
+      let nextNumber = Math.max(1, Number(floor.next) || 1);
+
+      const usedNumbers = existingTickets
+        .filter(ticket => typeof ticket === "string" && ticket.startsWith(prefix))
+        .map(ticket => Number(ticket.slice(prefix.length)))
+        .filter(number => Number.isInteger(number) && number > 0);
+
+      if (usedNumbers.length) {
+        nextNumber = Math.max(nextNumber, Math.max(...usedNumbers) + 1);
+      }
+
+      const ticket = `${floorKey}-${String(nextNumber).padStart(3, "0")}`;
+
+      floor.next = nextNumber + 1;
+      floor.waiting.push(ticket);
+      data.totalIssued = (Number(data.totalIssued) || 0) + 1;
+
+      data.activity.unshift({
+        ticket,
+        floor: floor.name || floors[floorKey].name,
+        service: String(service.name),
+        serviceCode: String(service.code),
+        status: "Waiting",
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit"
+        })
+      });
+
+      // Keep the same activity retention approach used by the existing system.
+      data.activity = data.activity.slice(0, 12);
+
+      try {
+        localStorage.setItem(QUEUE_KEY, JSON.stringify(data));
+      } catch (error) {
+        console.error("Could not save ticket:", error);
+        message.textContent =
+          "Ticket could not be saved. Check browser storage settings and try again.";
+        loadServices({ preserveSelection: true });
+        return;
+      }
+
+      issuedTicket = ticket;
+
+      document.getElementById("ticketNumber").textContent = ticket;
+      document.getElementById("ticketFloor").textContent =
+        floor.name || floors[floorKey].name;
+      document.getElementById("ticketService").textContent =
+        getServiceLabel(service);
+
+      setTicketStatus("Waiting");
+      ticketResult.classList.add("show");
+
+      ticketResult.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+      message.textContent = `Ticket ${ticket} issued successfully. Please wait for your number to be called.`;
+
+      updateTicketStatus();
+
+      // Refresh available services after issuing while leaving the
+      // issued ticket visible to the customer.
+      loadServices();
+    }
+
+    serviceSelect.addEventListener("change", () => {
+      const service = getSelectedService();
+
+      issueBtn.disabled = !service;
+      showDescription(service);
+
+      message.textContent = service
+        ? "Ready to issue your ticket."
+        : "Choose an active service to continue.";
+    });
+
+    floorSelect.addEventListener("change", () => {
+      ticketResult.classList.remove("show");
+      loadServices();
+    });
+
+    document.getElementById("refreshServices").addEventListener("click", () => {
+      loadServices({ preserveSelection: true });
+      message.textContent = "Service list refreshed.";
+    });
+
+    issueBtn.addEventListener("click", issueQueueTicket);
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      window.print();
+    });
+
+    window.addEventListener("storage", event => {
+      if (event.key === SERVICE_KEY || event.key === null) {
+        loadServices({ preserveSelection: true });
+      }
+
+      if (event.key === QUEUE_KEY || event.key === null) {
+        updateTicketStatus();
+      }
+    });
+
+    // Refresh services and ticket status as a backup for cross-tab changes.
+    setInterval(() => {
+      loadServices({ preserveSelection: true });
+      updateTicketStatus();
+    }, 3000);
+
+    loadServices();
+  </script>
+</body>
+</html>
+```

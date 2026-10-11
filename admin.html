@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b35">
+<title>QueueFlow | Admin</title>
+<style>
+:root{--navy:#101b35;--blue:#365cf5;--bg:#f4f6fb;--line:#e5e9f2;--muted:#778198;--green:#16865a;--red:#b42323}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font:14px "Segoe UI",Arial,sans-serif}
+[hidden]{display:none!important}
+button,input,select{font:inherit}
+button{border:0;border-radius:8px;padding:11px 15px;background:var(--blue);color:white;font-weight:700;cursor:pointer}
+button:hover{filter:brightness(.94)}
+button:disabled{opacity:.6;cursor:wait}
+input,select{width:100%;min-width:0;padding:11px 12px;border:1px solid #dce2ed;border-radius:8px;background:#fff;color:var(--navy)}
+label{display:block;font-size:12px;font-weight:750;margin-bottom:7px}
+.login-layout{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top right,#25396b,transparent 48%),var(--navy)}
+.login-card{width:min(430px,100%);padding:32px;background:#fff;border-radius:18px;box-shadow:0 24px 75px #0003}
+.brand{font-size:27px;font-weight:850;letter-spacing:-.5px}
+.brand span{color:var(--blue)}
+.muted{color:var(--muted);line-height:1.7}
+.login-card h1{font-size:24px;margin:25px 0 7px}
+.field{margin-top:16px}
+.primary{width:100%;margin-top:20px}
+.feedback{min-height:20px;font-size:12px;line-height:1.6;margin-top:12px;color:var(--red)}
+.feedback.ok{color:var(--green)}
+.demo-note{margin-top:22px;padding:12px;border-radius:8px;background:#f0f4ff;color:#40517c;font-size:11px;line-height:1.7}
+header{background:#fff;border-bottom:1px solid var(--line);padding:17px 4%;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.role{background:#edf1ff;color:var(--blue);border-radius:7px;padding:8px 10px;font-size:10px;font-weight:800}
+.container{width:min(1450px,92%);margin:30px auto 50px}
+.topline{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap}
+h1{font-size:clamp(27px,4vw,35px);margin:8px 0}
+h2{font-size:19px;margin:0}
+h3{font-size:16px;margin:0}
+.eyebrow{color:var(--blue);font-size:10px;font-weight:850;letter-spacing:2px}
+.intro,.description{color:var(--muted);line-height:1.7;font-size:12px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.secondary{background:#edf1f8;color:#34415c}
+.danger{background:#fff0f0;color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:24px}
+.stat,.panel,.floor-card{background:#fff;border:1px solid var(--line);border-radius:13px}
+.stat{padding:19px}
+.stat span{font-size:11px;color:var(--muted)}
+.stat strong{display:block;font-size:31px;margin-top:8px}
+.section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin:28px 0 14px}
+.floor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.floor-card{padding:17px}
+.floor-card strong{display:block;font-size:26px;margin:11px 0 5px;color:var(--blue)}
+.floor-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.7}
+.panel{padding:22px;margin-top:20px}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.panel-head p{color:var(--muted);font-size:11px;line-height:1.6;margin:6px 0 0}
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.full{grid-column:1/-1}
+.form-actions{display:flex;gap:9px;flex-wrap:wrap}
+.toolbar{display:grid;grid-template-columns:minmax(150px,1fr) 165px 150px;gap:9px;margin:18px 0 13px}
+.table-wrap{overflow-x:auto}
+table{width:100%;min-width:580px;border-collapse:collapse;font-size:12px;text-align:left}
+th,td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:9px;letter-spacing:.7px;color:var(--muted);background:#f8f9fc;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+.badge{display:inline-block;border-radius:6px;padding:5px 8px;font-size:10px;font-weight:800;background:#edf1ff;color:var(--blue)}
+.badge.active{background:#e5f8ef;color:#167447}
+.badge.inactive{background:#f0f1f5;color:#687185}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.row-actions button{padding:7px 9px;font-size:10px}
+.empty{text-align:center;color:var(--muted);padding:25px 10px}
+footer{text-align:center;padding:24px;color:#939caf;font-size:10px}
+@media(max-width:950px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.two-cols{grid-template-columns:1fr}}
+@media(max-width:600px){header{align-items:flex-start;flex-direction:column}.container{width:94%;margin-top:22px}.stats,.floor-grid,.form-grid,.toolbar{grid-template-columns:1fr}.full{grid-column:auto}.panel{padding:16px}.login-card{padding:24px}}
+</style>
+</head>
+<body>
+<section id="loginView" class="login-layout">
+  <div class="login-card">
+    <div class="brand">Queue<span>Flow</span></div>
+    <p class="muted">Queue Management System</p>
+    <h1>Administrator Login</h1>
+    <p class="muted">Sign in to manage tellers, counters, services, and queue activity.</p>
+    <form id="loginForm">
+      <div class="field"><label for="username">Username</label><input id="username" autocomplete="username" value="admin" required></div>
+      <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div>
+      <button id="loginBtn" class="primary" type="submit">Sign In</button>
+    </form>
+    <div id="loginMessage" class="feedback" role="status"></div>
+    <div class="field" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <button type="button" id="showRegisterBtn" class="secondary">Create Admin Account</button>
+      <button type="button" id="showForgotBtn" class="secondary">Forgot Password?</button>
+    </div>
+
+    <form id="registerForm" hidden>
+      <h2 style="margin-top:24px">Create Admin Account</h2>
+      <div class="field"><label for="regUsername">Username</label><input id="regUsername" autocomplete="username" minlength="3" maxlength="40" required></div>
+      <div class="field"><label for="regEmail">Email</label><input id="regEmail" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="regPassword">Password</label><input id="regPassword" type="password" autocomplete="new-password" minlength="8" required></div>
+      <button class="primary" type="submit">Register</button>
+      <button type="button" id="backFromRegister" class="secondary" style="width:100%;margin-top:10px">Back to Sign In</button>
+      <div id="registerMessage" class="feedback" role="status"></div>
+</form>
+
+    <form id="forgotForm" hidden>
+      <h2 style="margin-top:24px">Forgot Password</h2>
+      <p class="muted">Enter the email address used for your registered admin account.</p>
+      <div class="field"><label for="forgotEmail">Email</label><input id="forgotEmail" type="email" autocomplete="email" required></div>
+      <button class="primary" type="submit">Request Reset Code</button>
+      <button type="button" id="backFromForgot" class="secondary" style="width:100%;margin-top:10px">Back to Sign In</button>
+      <div id="forgotMessage" class="feedback" role="status"></div>
+      <button type="button" id="showResetBtn" class="secondary" style="width:100%;margin-top:10px">I Have a Reset Code</button>
+    </form>
+
+    <form id="resetForm" hidden>
+      <h2 style="margin-top:24px">Reset Password</h2>
+      <div class="field"><label for="resetEmail">Registered Email</label><input id="resetEmail" type="email" required></div>
+      <div class="field"><label for="resetCode">Reset Code</label><input id="resetCode" autocomplete="one-time-code" required></div>
+      <div class="field"><label for="resetPassword">New Password</label><input id="resetPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+      <button class="primary" type="submit">Reset Password</button>
+      <button type="button" id="backFromReset" class="secondary" style="width:100%;margin-top:10px">Back to Sign In</button>
+      <div id="resetMessage" class="feedback" role="status"></div>
+    </form>
+
+    <div class="demo-note">Local development login: <strong>admin</strong> / <strong>QueueFlow@123</strong>. Change the default password before using this on a real network.</div>
+  </div>
+</section>
+
+<div id="appView" hidden>
+<header>
+  <div class="brand">Queue<span>Flow</span></div>
+  <div class="header-right"><span class="role">ADMIN CONTROL PANEL</span><span id="adminLabel" class="muted">Administrator</span><button id="refreshBtn" class="secondary">Refresh</button><button id="logoutBtn" class="danger">Log Out</button></div>
+</header>
+
+<main class="container">
+  <div class="topline">
+    <div><div class="eyebrow">SYSTEM OVERVIEW</div><h1>Administration Dashboard</h1><p class="muted">Manage teller assignments and services in one place. Queue calling remains in the Teller page.</p></div>
+    <div class="actions"><a href="kiosk.html">Kiosk</a><a href="teller.html">Teller</a><a href="display.html">Display</a></div>
+  </div>
+
+  <section class="stats">
+    <div class="stat"><span>Total Tickets</span><strong id="totalCount">0</strong></div>
+    <div class="stat"><span>Waiting</span><strong id="waitingCount">0</strong></div>
+    <div class="stat"><span>Now Serving</span><strong id="servingCount">0</strong></div>
+    <div class="stat"><span>Completed</span><strong id="completedCount">0</strong></div>
+  </section>
+
+  <div class="section-title"><div><h2>Floor Queue Overview</h2><p class="description">Live ticket status by floor.</p></div><span id="updatedAt" class="description">Not refreshed yet</span></div>
+  <section id="floorGrid" class="floor-grid"></section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h2>Teller &amp; Counter Management</h2><p>Create a teller access code and assign a floor and counter. The access code is shown only when you create or change it.</p></div><span class="badge" id="tellerCount">0 TELLERS</span></div>
+    <form id="tellerForm">
+      <div class="form-grid">
+        <div><label for="tellerName">Teller Full Name *</label><input id="tellerName" maxlength="80" required placeholder="e.g. Juan Dela Cruz"></div>
+        <div><label for="tellerCounter">Counter *</label><input id="tellerCounter" maxlength="40" required placeholder="e.g. Counter 1"></div>
+        <div><label for="tellerFloor">Assigned Floor *</label><select id="tellerFloor"><option value="G">Ground Floor</option><option value="2">2nd Floor</option><option value="3">3rd Floor</option></select></div>
+        <div><label for="tellerStatus">Status</label><select id="tellerStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+        <div class="full"><label for="tellerCode">Teller Access Code *</label><input id="tellerCode" minlength="4" maxlength="32" pattern="[A-Za-z0-9_-]{4,32}" required placeholder="Create a unique code, 4–32 characters"><p class="description" id="tellerCodeHelp">Give this code privately to the assigned teller.</p></div>
+        <div class="full form-actions"><button id="tellerSaveBtn" type="submit">Add Teller</button><button id="tellerCancelBtn" class="secondary" type="button" hidden>Cancel Edit</button></div>
+      </div>
+    </form>
+    <p id="tellerMessage" class="feedback" role="status"></p>
+    <div class="toolbar">
+      <input id="tellerSearch" type="search" placeholder="Search teller or counter">
+      <select id="tellerFloorFilter"><option value="all">All Floors</option><option value="G">Ground Floor</option><option value="2">2nd Floor</option><option value="3">3rd Floor</option></select>
+      <select id="tellerStatusFilter"><option value="all">All Statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>TELLER</th><th>COUNTER</th><th>FLOOR</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="tellerTable"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h2>Service Management</h2><p>Add services that customers can select from the Kiosk.</p></div><span class="badge" id="serviceCount">0 SERVICES</span></div>
+    <form id="serviceForm">
+      <div class="form-grid">
+        <div><label for="serviceName">Service Name *</label><input id="serviceName" maxlength="80" required placeholder="e.g. General Inquiry"></div>
+        <div><label for="serviceCode">Service Code *</label><input id="serviceCode" maxlength="12" required pattern="[A-Za-z0-9_-]{1,12}" placeholder="e.g. GEN"></div>
+        <div><label for="serviceFloor">Assigned Floor *</label><select id="serviceFloor"><option value="G">Ground Floor</option><option value="2">2nd Floor</option><option value="3">3rd Floor</option></select></div>
+        <div><label for="serviceStatus">Status</label><select id="serviceStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+        <div class="full"><label for="serviceDescription">Description</label><input id="serviceDescription" maxlength="250" placeholder="Optional service description"></div>
+        <div class="full form-actions"><button id="serviceSaveBtn" type="submit">Add Service</button><button id="serviceCancelBtn" class="secondary" type="button" hidden>Cancel Edit</button></div>
+      </div>
+    </form>
+    <p id="serviceMessage" class="feedback" role="status"></p>
+    <div class="toolbar"><input id="serviceSearch" type="search" placeholder="Search service or code"><select id="serviceFloorFilter"><option value="all">All Floors</option><option value="G">Ground Floor</option><option value="2">2nd Floor</option><option value="3">3rd Floor</option></select><select id="serviceStatusFilter"><option value="all">All Statuses</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+    <div class="table-wrap"><table><thead><tr><th>CODE</th><th>SERVICE</th><th>FLOOR</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="serviceTable"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><div><h2>Recent Queue Activity</h2><p>Latest tickets from the shared backend.</p></div></div>
+    <div class="table-wrap"><table><thead><tr><th>TICKET</th><th>CUSTOMER</th><th>SERVICE</th><th>TELLER / COUNTER</th><th>STATUS</th></tr></thead><tbody id="activityTable"></tbody></table></div>
+  </section>
+</main>
+<footer>QueueFlow · Administration</footer>
+</div>
+
+<script>
+"use strict";
+
+const API = "/api";
+let token = sessionStorage.getItem("qfAdminToken") || "";
+let tellers = [];
+let services = [];
+let tellerEditId = null;
+let serviceEditId = null;
+
+const $ = id => document.getElementById(id);
+const floorNames = { G: "Ground Floor", "2": "2nd Floor", "3": "3rd Floor" };
+
+async function request(path, options = {}) {
+  const headers = { "Content-Type": "application/json" };
+  if (token) headers.Authorization = "Bearer " + token;
+  Object.assign(headers, options.headers || {});
+  const response = await fetch(API + path, { ...options, headers, cache: "no-store" });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 401 && token) {
+      sessionStorage.removeItem("qfAdminToken");
+      token = "";
+      showLogin();
+    }
+    throw new Error(data.error || "Request failed.");
+  }
+  return data;
+}
+
+function showLogin() {
+  $("loginView").hidden = false;
+  $("appView").hidden = true;
+}
+
+function showApp() {
+  $("loginView").hidden = true;
+  $("appView").hidden = false;
+}
+
+function feedback(id, text, error = false) {
+  $(id).textContent = text;
+  $(id).className = "feedback" + (error ? "" : " ok");
+}
+
+function clearFeedback(id) {
+  $(id).textContent = "";
+  $(id).className = "feedback";
+}
+
+
+function showAuthForm(name) {
+  ["loginForm", "registerForm", "forgotForm", "resetForm"].forEach(id => {
+    $(id).hidden = id !== name;
+  });
+  ["loginMessage", "registerMessage", "forgotMessage", "resetMessage"].forEach(id => {
+    clearFeedback(id);
+  });
+}
+
+$("showRegisterBtn").addEventListener("click", () => showAuthForm("registerForm"));
+$("showForgotBtn").addEventListener("click", () => showAuthForm("forgotForm"));
+$("backFromRegister").addEventListener("click", () => showAuthForm("loginForm"));
+$("backFromForgot").addEventListener("click", () => showAuthForm("loginForm"));
+$("backFromReset").addEventListener("click", () => showAuthForm("loginForm"));
+$("showResetBtn").addEventListener("click", () => {
+  $("resetEmail").value = $("forgotEmail").value;
+  showAuthForm("resetForm");
+});
+
+$("registerForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  try {
+    const result = await request("/auth/admin/register", {
+      method: "POST",
+      body: JSON.stringify({
+        username: $("regUsername").value.trim(),
+        email: $("regEmail").value.trim(),
+        password: $("regPassword").value,
+      })
+    });
+    feedback("registerMessage", result.message || "Registration successful.");
+    $("registerForm").reset();
+    setTimeout(() => showAuthForm("loginForm"), 1000);
+  } catch (error) {
+    feedback("registerMessage", error.message, true);
+  }
+});
+
+$("forgotForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  try {
+    const result = await request("/auth/admin/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email: $("forgotEmail").value.trim() })
+    });
+    feedback("forgotMessage", result.message || "If the account exists, reset instructions are available.");
+  } catch (error) {
+    feedback("forgotMessage", error.message, true);
+  }
+});
+
+$("resetForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  try {
+    const result = await request("/auth/admin/reset-password", {
+      method: "POST",
+      body: JSON.stringify({
+        email: $("resetEmail").value.trim(),
+        code: $("resetCode").value.trim(),
+        newPassword: $("resetPassword").value
+      })
+    });
+    feedback("resetMessage", result.message || "Password reset successful.");
+    $("resetForm").reset();
+    setTimeout(() => showAuthForm("loginForm"), 1200);
+  } catch (error) {
+    feedback("resetMessage", error.message, true);
+  }
+});
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  $("loginBtn").disabled = true;
+  $("loginMessage").textContent = "Signing in...";
+  try {
+    const result = await request("/auth/admin/login", {
+      method: "POST",
+      body: JSON.stringify({
+        username: $("username").value.trim(),
+        password: $("password").value
+      })
+    });
+    token = result.token;
+    sessionStorage.setItem("qfAdminToken", token);
+    $("adminLabel").textContent = result.user.username;
+    showApp();
+    await loadDashboard();
+  } catch (error) {
+    feedback("loginMessage", error.message, true);
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  try { await request("/auth/logout", { method: "POST" }); } catch {}
+  token = "";
+  sessionStorage.removeItem("qfAdminToken");
+  $("password").value = "";
+  showLogin();
+});
+
+$("refreshBtn").addEventListener("click", () => loadDashboard());
+
+function makeCell(row, value) {
+  const td = document.createElement("td");
+  td.textContent = value == null ? "" : String(value);
+  row.appendChild(td);
+  return td;
+}
+
+function addAction(row, label, className, handler) {
+  const td = row.lastElementChild;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.textContent = label;
+  button.addEventListener("click", handler);
+  td.appendChild(button);
+}
+
+function showEmpty(tbodyId, columns, message) {
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.colSpan = columns;
+  cell.className = "empty";
+  cell.textContent = message;
+  row.appendChild(cell);
+  $(tbodyId).appendChild(row);
+}
+
+async function loadDashboard() {
+  try {
+    const result = await request("/admin/overview");
+    const totals = result.totals || {};
+    $("totalCount").textContent = totals.total || 0;
+    $("waitingCount").textContent = totals.waiting || 0;
+    $("servingCount").textContent = totals.serving || 0;
+    $("completedCount").textContent = totals.completed || 0;
+    $("updatedAt").textContent = "Updated: " + new Date().toLocaleTimeString();
+
+    tellers = Array.isArray(result.tellers) ? result.tellers : [];
+    services = Array.isArray(result.services) ? result.services : [];
+    renderFloors(result.floors || {});
+    renderTellers();
+    renderServices();
+    renderActivity(Array.isArray(result.recentActivity) ? result.recentActivity : []);
+  } catch (error) {
+    if (token) console.error("Admin refresh failed:", error);
+  }
+}
+
+function renderFloors(floors) {
+  const grid = $("floorGrid");
+  grid.replaceChildren();
+  for (const key of ["G", "2", "3"]) {
+    const floor = floors[key] || { waiting: 0, tellers: 0, serving: [] };
+    const card = document.createElement("article");
+    card.className = "floor-card";
+    const title = document.createElement("h3");
+    title.textContent = floorNames[key];
+    const serving = Array.isArray(floor.serving) ? floor.serving : [];
+    const strong = document.createElement("strong");
+    strong.textContent = serving.length ? serving.map(ticket => ticket.number).join(", ") : "---";
+    const text = document.createElement("p");
+    text.textContent = "Waiting: " + (floor.waiting || 0) + " · Active tellers: " + (floor.tellers || 0);
+    card.append(title, strong, text);
+    grid.appendChild(card);
+  }
+}
+
+function renderTellers() {
+  $("tellerCount").textContent = tellers.length + (tellers.length === 1 ? " TELLER" : " TELLERS");
+  const q = $("tellerSearch").value.trim().toLowerCase();
+  const floor = $("tellerFloorFilter").value;
+  const status = $("tellerStatusFilter").value;
+  const filtered = tellers.filter(item =>
+    (String(item.name).toLowerCase().includes(q) || String(item.counter).toLowerCase().includes(q)) &&
+    (floor === "all" || item.floor === floor) &&
+    (status === "all" || item.status === status)
+  );
+  const tbody = $("tellerTable");
+  tbody.replaceChildren();
+  if (!filtered.length) {
+    showEmpty("tellerTable", 5, "No teller assignments match. Add a teller using the form above.");
+    return;
+  }
+  for (const item of filtered) {
+    const row = document.createElement("tr");
+    makeCell(row, item.name);
+    makeCell(row, item.counter);
+    makeCell(row, floorNames[item.floor] || item.floor);
+    const statusCell = makeCell(row, "");
+    const badge = document.createElement("span");
+    badge.className = "badge " + item.status.toLowerCase();
+    badge.textContent = item.status;
+    statusCell.appendChild(badge);
+    makeCell(row, "");
+    addAction(row, "Edit", "secondary", () => {
+      tellerEditId = item.id;
+      $("tellerName").value = item.name;
+      $("tellerCounter").value = item.counter;
+      $("tellerFloor").value = item.floor;
+      $("tellerStatus").value = item.status;
+      $("tellerCode").required = false;
+      $("tellerCode").value = "";
+      $("tellerCode").placeholder = "Leave blank to keep current code";
+      $("tellerCodeHelp").textContent = "Leave blank to keep the existing code, or enter a new code.";
+      $("tellerCodeHelp").className = "description";
+      $("tellerSaveBtn").textContent = "Save Changes";
+      $("tellerCancelBtn").hidden = false;
+      $("tellerForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    addAction(row, "Remove", "danger", async () => {
+      if (!confirm("Remove teller assignment for " + item.name + "?")) return;
+      try {
+        await request("/admin/tellers/" + encodeURIComponent(item.id), { method: "DELETE" });
+        await loadDashboard();
+        feedback("tellerMessage", "Teller assignment removed.");
+      } catch (error) { feedback("tellerMessage", error.message, true); }
+    });
+    tbody.appendChild(row);
+  }
+}
+
+function resetTellerForm() {
+  $("tellerForm").reset();
+  $("tellerFloor").value = "G";
+  $("tellerStatus").value = "Active";
+  $("tellerCode").required = true;
+  $("tellerCode").placeholder = "Create a unique code, 4–32 characters";
+  $("tellerCodeHelp").textContent = "Give this code privately to the assigned teller.";
+  $("tellerSaveBtn").textContent = "Add Teller";
+  $("tellerCancelBtn").hidden = true;
+  tellerEditId = null;
+}
+
+$("tellerForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const payload = {
+    name: $("tellerName").value.trim(),
+    counter: $("tellerCounter").value.trim(),
+    floor: $("tellerFloor").value,
+    status: $("tellerStatus").value,
+    accessCode: $("tellerCode").value.trim()
+  };
+  if (!tellerEditId && !payload.accessCode) {
+    feedback("tellerMessage", "Create an access code for this teller.", true);
+    return;
+  }
+  try {
+    const path = tellerEditId
+      ? "/admin/tellers/" + encodeURIComponent(tellerEditId)
+      : "/admin/tellers";
+    await request(path, {
+      method: tellerEditId ? "PUT" : "POST",
+      body: JSON.stringify(payload)
+    });
+    resetTellerForm();
+    await loadDashboard();
+    feedback("tellerMessage", "Teller assignment saved.");
+  } catch (error) { feedback("tellerMessage", error.message, true); }
+});
+
+$("tellerCancelBtn").addEventListener("click", resetTellerForm);
+
+function renderServices() {
+  $("serviceCount").textContent = services.length + (services.length === 1 ? " SERVICE" : " SERVICES");
+  const q = $("serviceSearch").value.trim().toLowerCase();
+  const floor = $("serviceFloorFilter").value;
+  const status = $("serviceStatusFilter").value;
+  const filtered = services.filter(item =>
+    (String(item.name).toLowerCase().includes(q) || String(item.code).toLowerCase().includes(q)) &&
+    (floor === "all" || item.floor === floor) &&
+    (status === "all" || item.status === status)
+  );
+  const tbody = $("serviceTable");
+  tbody.replaceChildren();
+  if (!filtered.length) {
+    showEmpty("serviceTable", 5, "No services match. Add a service using the form above.");
+    return;
+  }
+  for (const item of filtered) {
+    const row = document.createElement("tr");
+    makeCell(row, item.code);
+    makeCell(row, item.name);
+    makeCell(row, floorNames[item.floor] || item.floor);
+    const statusCell = makeCell(row, "");
+    const badge = document.createElement("span");
+    badge.className = "badge " + item.status.toLowerCase();
+    badge.textContent = item.status;
+    statusCell.appendChild(badge);
+    makeCell(row, "");
+    addAction(row, "Edit", "secondary", () => {
+      serviceEditId = item.id;
+      $("serviceName").value = item.name;
+      $("serviceCode").value = item.code;
+      $("serviceFloor").value = item.floor;
+      $("serviceStatus").value = item.status;
+      $("serviceDescription").value = item.description || "";
+      $("serviceSaveBtn").textContent = "Save Changes";
+      $("serviceCancelBtn").hidden = false;
+      $("serviceForm").scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    addAction(row, "Delete", "danger", async () => {
+      if (!confirm("Delete service " + item.name + "?")) return;
+      try {
+        await request("/admin/services/" + encodeURIComponent(item.id), { method: "DELETE" });
+        await loadDashboard();
+        feedback("serviceMessage", "Service deleted.");
+      } catch (error) { feedback("serviceMessage", error.message, true); }
+    });
+    tbody.appendChild(row);
+  }
+}
+
+function resetServiceForm() {
+  $("serviceForm").reset();
+  $("serviceFloor").value = "G";
+  $("serviceStatus").value = "Active";
+  $("serviceSaveBtn").textContent = "Add Service";
+  $("serviceCancelBtn").hidden = true;
+  serviceEditId = null;
+}
+
+$("serviceForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const payload = {
+    name: $("serviceName").value.trim(),
+    code: $("serviceCode").value.trim().toUpperCase(),
+    floor: $("serviceFloor").value,
+    status: $("serviceStatus").value,
+    description: $("serviceDescription").value.trim()
+  };
+  try {
+    const path = serviceEditId
+      ? "/admin/services/" + encodeURIComponent(serviceEditId)
+      : "/admin/services";
+    await request(path, {
+      method: serviceEditId ? "PUT" : "POST",
+      body: JSON.stringify(payload)
+    });
+    resetServiceForm();
+    await loadDashboard();
+    feedback("serviceMessage", "Service saved.");
+  } catch (error) { feedback("serviceMessage", error.message, true); }
+});
+
+$("serviceCancelBtn").addEventListener("click", resetServiceForm);
+
+function renderActivity(items) {
+  const tbody = $("activityTable");
+  tbody.replaceChildren();
+  if (!items.length) {
+    showEmpty("activityTable", 5, "No queue activity yet.");
+    return;
+  }
+  for (const item of items.slice(0, 20)) {
+    const row = document.createElement("tr");
+    makeCell(row, item.number || "---");
+    makeCell(row, item.name || "---");
+    makeCell(row, item.serviceName || item.serviceCode || "---");
+    makeCell(row, (item.tellerName || "Unassigned") + " / " + (item.counter || "Unassigned"));
+    makeCell(row, item.status || "---");
+    tbody.appendChild(row);
+  }
+}
+
+["tellerSearch", "tellerFloorFilter", "tellerStatusFilter"].forEach(id => {
+  $(id).addEventListener(id === "tellerSearch" ? "input" : "change", renderTellers);
+});
+["serviceSearch", "serviceFloorFilter", "serviceStatusFilter"].forEach(id => {
+  $(id).addEventListener(id === "serviceSearch" ? "input" : "change", renderServices);
+});
+
+async function startWithExistingSession() {
+  if (!token) {
+    showLogin();
+    return;
+  }
+  try {
+    const me = await request("/admin/overview");
+    $("adminLabel").textContent = "Administrator";
+    showApp();
+    const totals = me.totals || {};
+    $("totalCount").textContent = totals.total || 0;
+    $("waitingCount").textContent = totals.waiting || 0;
+    $("servingCount").textContent = totals.serving || 0;
+    $("completedCount").textContent = totals.completed || 0;
+    tellers = me.tellers || [];
+    services = me.services || [];
+    renderFloors(me.floors || {});
+    renderTellers();
+    renderServices();
+    renderActivity(me.recentActivity || []);
+    $("updatedAt").textContent = "Updated: " + new Date().toLocaleTimeString();
+  } catch {
+    token = "";
+    sessionStorage.removeItem("qfAdminToken");
+    showLogin();
+  }
+}
+
+startWithExistingSession();
+setInterval(() => {
+  if (token && !$("appView").hidden) loadDashboard();
+}, 5000);
+</script>
+</body>
+</html>
