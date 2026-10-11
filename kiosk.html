@@ -409,7 +409,99 @@
       ) || null;
     }
 
-    function loadServices(options = {}) {
+  
+async function loadServices(options = {}) {
+  const preserveSelection = options.preserveSelection === true;
+  const previousId = preserveSelection ? serviceSelect.value : "";
+  const floorKey = floorSelect.value;
+
+  serviceSelect.replaceChildren();
+
+  const loadingOption = document.createElement("option");
+  loadingOption.value = "";
+  loadingOption.textContent = "Loading services...";
+  serviceSelect.appendChild(loadingOption);
+
+  issueBtn.disabled = true;
+  showDescription(null);
+
+  try {
+    const response = await fetch(
+      `https://quieng-system-api.onrender.com/api/public/services?floor=${encodeURIComponent(floorKey)}`,
+      { cache: "no-store" }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load services.");
+    }
+
+    activeServices = Array.isArray(data.services)
+      ? data.services.filter(service =>
+          getServiceId(service) !== "" &&
+          isServiceActive(service) &&
+          serviceBelongsToFloor(service, floorKey)
+        )
+      : [];
+
+  } catch (error) {
+    activeServices = [];
+    serviceSelect.replaceChildren();
+
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Unable to load services";
+    serviceSelect.appendChild(option);
+
+    issueBtn.disabled = true;
+    showDescription(null);
+    message.textContent = "Unable to load services. Please refresh and try again.";
+
+    console.error("Could not load services:", error);
+    return;
+  }
+
+  serviceSelect.replaceChildren();
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+
+  if (activeServices.length === 0) {
+    placeholder.textContent = "No active services for this floor";
+    serviceSelect.appendChild(placeholder);
+
+    issueBtn.disabled = true;
+    showDescription(null);
+    message.textContent = "No active services found for this floor.";
+    return;
+  }
+
+  placeholder.textContent = "Choose a service";
+  serviceSelect.appendChild(placeholder);
+
+  activeServices.forEach(service => {
+    const option = document.createElement("option");
+    option.value = getServiceId(service);
+    option.textContent = getServiceLabel(service);
+    serviceSelect.appendChild(option);
+  });
+
+  if (
+    previousId &&
+    activeServices.some(service => getServiceId(service) === previousId)
+  ) {
+    serviceSelect.value = previousId;
+  } else {
+    serviceSelect.value = "";
+  }
+
+  const selected = getSelectedService();
+  issueBtn.disabled = !selected;
+  showDescription(selected);
+
+  message.textContent = `${activeServices.length} active service(s) available.`;
+}
       const preserveSelection = options.preserveSelection === true;
       const previousId = preserveSelection ? serviceSelect.value : "";
 
@@ -585,7 +677,7 @@
       const floorKey = floorSelect.value;
       const selectedId = serviceSelect.value;
 
-      const service = readServices().find(item =>
+      const service = activeServices.find(item =>
         getServiceId(item) === selectedId &&
         isServiceActive(item) &&
         serviceBelongsToFloor(item, floorKey)
