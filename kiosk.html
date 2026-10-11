@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,7 +312,8 @@
     "use strict";
 
     const QUEUE_KEY = "qmsDataV1";
-    const SERVICE_KEY = "qmsServicesV1";
+
+    const API_BASE = "https://quieng-system-api.onrender.com/api";
 
     const floors = {
       G: { name: "Ground Floor" },
@@ -330,6 +331,7 @@
 
     let activeServices = [];
     let issuedTicket = null;
+    let serviceLoadNumber = 0;
 
     function normalizeFloor(value) {
       const floor = String(value ?? "").trim().toLowerCase();
@@ -347,18 +349,6 @@
       }
 
       return String(value ?? "").trim();
-    }
-
-    function readServices() {
-      try {
-        const raw = localStorage.getItem(SERVICE_KEY);
-        const saved = raw ? JSON.parse(raw) : [];
-
-        return Array.isArray(saved) ? saved : [];
-      } catch (error) {
-        console.error("Could not read services:", error);
-        return [];
-      }
     }
 
     function isServiceActive(service) {
@@ -409,111 +399,71 @@
       ) || null;
     }
 
-  
-async function loadServices(options = {}) {
-  const preserveSelection = options.preserveSelection === true;
-  const previousId = preserveSelection ? serviceSelect.value : "";
-  const floorKey = floorSelect.value;
-
-  serviceSelect.replaceChildren();
-
-  const loadingOption = document.createElement("option");
-  loadingOption.value = "";
-  loadingOption.textContent = "Loading services...";
-  serviceSelect.appendChild(loadingOption);
-
-  issueBtn.disabled = true;
-  showDescription(null);
-
-  try {
-    const response = await fetch(
-      `https://quieng-system-api.onrender.com/api/public/services?floor=${encodeURIComponent(floorKey)}`,
-      { cache: "no-store" }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Could not load services.");
-    }
-
-    activeServices = Array.isArray(data.services)
-      ? data.services.filter(service =>
-          getServiceId(service) !== "" &&
-          isServiceActive(service) &&
-          serviceBelongsToFloor(service, floorKey)
-        )
-      : [];
-
-  } catch (error) {
-    activeServices = [];
-    serviceSelect.replaceChildren();
-
-    const option = document.createElement("option");
-    option.value = "";
-    option.textContent = "Unable to load services";
-    serviceSelect.appendChild(option);
-
-    issueBtn.disabled = true;
-    showDescription(null);
-    message.textContent = "Unable to load services. Please refresh and try again.";
-
-    console.error("Could not load services:", error);
-    return;
-  }
-
-  serviceSelect.replaceChildren();
-
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-
-  if (activeServices.length === 0) {
-    placeholder.textContent = "No active services for this floor";
-    serviceSelect.appendChild(placeholder);
-
-    issueBtn.disabled = true;
-    showDescription(null);
-    message.textContent = "No active services found for this floor.";
-    return;
-  }
-
-  placeholder.textContent = "Choose a service";
-  serviceSelect.appendChild(placeholder);
-
-  activeServices.forEach(service => {
-    const option = document.createElement("option");
-    option.value = getServiceId(service);
-    option.textContent = getServiceLabel(service);
-    serviceSelect.appendChild(option);
-  });
-
-  if (
-    previousId &&
-    activeServices.some(service => getServiceId(service) === previousId)
-  ) {
-    serviceSelect.value = previousId;
-  } else {
-    serviceSelect.value = "";
-  }
-
-  const selected = getSelectedService();
-  issueBtn.disabled = !selected;
-  showDescription(selected);
-
-  message.textContent = `${activeServices.length} active service(s) available.`;
-}
+    async function loadServices(options = {}) {
+      const requestNumber = ++serviceLoadNumber;
       const preserveSelection = options.preserveSelection === true;
       const previousId = preserveSelection ? serviceSelect.value : "";
+      const floorKey = normalizeFloor(floorSelect.value);
 
-      const floorKey = floorSelect.value;
+      issueBtn.disabled = true;
+      activeServices = [];
+      showDescription(null);
 
-      activeServices = readServices().filter(service =>
-        isServiceActive(service) &&
-        serviceBelongsToFloor(service, floorKey) &&
-        getServiceId(service) !== "" &&
-        String(service.name ?? "").trim() !== "" &&
-        String(service.code ?? "").trim() !== ""
-      );
+      serviceSelect.replaceChildren();
+
+      const loadingOption = document.createElement("option");
+      loadingOption.value = "";
+      loadingOption.textContent = "Loading services...";
+      serviceSelect.appendChild(loadingOption);
+
+      message.textContent = "Loading active services...";
+
+      try {
+        const response = await fetch(
+          `${API_BASE}/public/services?floor=${encodeURIComponent(floorKey)}`,
+          { cache: "no-store" }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Could not load services.");
+        }
+
+        // Ignore older requests if the selected floor has changed.
+        if (requestNumber !== serviceLoadNumber) return;
+
+        activeServices = Array.isArray(data.services)
+          ? data.services.filter(service =>
+              getServiceId(service) !== "" &&
+              String(service.name ?? "").trim() !== "" &&
+              String(service.code ?? "").trim() !== "" &&
+              isServiceActive(service) &&
+              serviceBelongsToFloor(service, floorKey)
+            )
+          : [];
+
+      } catch (error) {
+        if (requestNumber !== serviceLoadNumber) return;
+
+        activeServices = [];
+        serviceSelect.replaceChildren();
+
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "Unable to load services";
+        serviceSelect.appendChild(option);
+
+        issueBtn.disabled = true;
+        showDescription(null);
+        message.textContent =
+          "Unable to load services. Please refresh and try again.";
+
+        console.error("Could not load services:", error);
+        return;
+      }
+
+      if (requestNumber !== serviceLoadNumber) return;
 
       serviceSelect.replaceChildren();
 
@@ -523,15 +473,12 @@ async function loadServices(options = {}) {
       if (activeServices.length === 0) {
         placeholder.textContent = "No active services for this floor";
         serviceSelect.appendChild(placeholder);
-        serviceSelect.value = "";
+
         issueBtn.disabled = true;
-
         showDescription(null);
-        description.textContent =
-          "Please ask the administrator to add an active service for this floor.";
-
         message.textContent =
-          `No active services found for ${floors[floorKey].name}. Check Service Management.`;
+          `No active services found for ${floors[floorKey]?.name || floorKey}.`;
+
         return;
       }
 
@@ -545,9 +492,10 @@ async function loadServices(options = {}) {
         serviceSelect.appendChild(option);
       });
 
-      if (previousId && activeServices.some(
-        service => getServiceId(service) === previousId
-      )) {
+      if (
+        previousId &&
+        activeServices.some(service => getServiceId(service) === previousId)
+      ) {
         serviceSelect.value = previousId;
       } else {
         serviceSelect.value = "";
@@ -560,7 +508,7 @@ async function loadServices(options = {}) {
 
       message.textContent = selected
         ? "Ready to issue your ticket."
-        : `${activeServices.length} active service(s) available on ${floors[floorKey].name}.`;
+        : `${activeServices.length} active service(s) available on ${floors[floorKey]?.name || floorKey}.`;
     }
 
     function createEmptyQueueData() {
@@ -611,7 +559,6 @@ async function loadServices(options = {}) {
           : 1;
 
         if (!floor.name) floor.name = floors[key].name;
-
         if (!("serving" in floor)) floor.serving = null;
       }
 
@@ -664,132 +611,176 @@ async function loadServices(options = {}) {
         }
       }
 
-      // Preserve the last known status if this ticket is no longer
-      // present in the waiting list or recent activity.
       if (status) setTicketStatus(status);
     }
 
-    function issueQueueTicket() {
+    async function issueQueueTicket() {
+      if (issueBtn.disabled) return;
+
       issueBtn.disabled = true;
 
-      // Re-read the service list before issuing, so a service that was
-      // deactivated or removed cannot be selected from stale page data.
-      const floorKey = floorSelect.value;
+      const floorKey = normalizeFloor(floorSelect.value);
       const selectedId = serviceSelect.value;
 
-      const service = activeServices.find(item =>
-        getServiceId(item) === selectedId &&
-        isServiceActive(item) &&
-        serviceBelongsToFloor(item, floorKey)
-      );
-
-      if (!service) {
-        loadServices();
-        message.textContent =
-          "The selected service is no longer active. Please select an active service.";
-        return;
-      }
-
       if (!floors[floorKey]) {
-        message.textContent = "Invalid floor selection. Please refresh the page.";
-        loadServices();
-        return;
-      }
-
-      const data = readQueueData();
-
-      if (!data) {
         message.textContent =
-          "Queue data could not be read. Please refresh and try again.";
-        loadServices({ preserveSelection: true });
+          "Invalid floor selection. Please refresh the page.";
+        await loadServices();
         return;
       }
 
-      const floor = data.floors[floorKey];
-
-      if (!floor) {
-        message.textContent =
-          "Floor data is missing. Please refresh the page.";
-        loadServices();
-        return;
-      }
-
-      // Reconcile the next number with existing queue records to avoid
-      // reusing a ticket number if stored data is partially inconsistent.
-      const existingTickets = [
-        ...floor.waiting,
-        ...(floor.serving ? [floor.serving] : []),
-        ...data.activity
-          .filter(item => item && item.ticket)
-          .map(item => item.ticket)
-      ];
-
-      const prefix = `${floorKey}-`;
-      let nextNumber = Math.max(1, Number(floor.next) || 1);
-
-      const usedNumbers = existingTickets
-        .filter(ticket => typeof ticket === "string" && ticket.startsWith(prefix))
-        .map(ticket => Number(ticket.slice(prefix.length)))
-        .filter(number => Number.isInteger(number) && number > 0);
-
-      if (usedNumbers.length) {
-        nextNumber = Math.max(nextNumber, Math.max(...usedNumbers) + 1);
-      }
-
-      const ticket = `${floorKey}-${String(nextNumber).padStart(3, "0")}`;
-
-      floor.next = nextNumber + 1;
-      floor.waiting.push(ticket);
-      data.totalIssued = (Number(data.totalIssued) || 0) + 1;
-
-      data.activity.unshift({
-        ticket,
-        floor: floor.name || floors[floorKey].name,
-        service: String(service.name),
-        serviceCode: String(service.code),
-        status: "Waiting",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit"
-        })
-      });
-
-      // Keep the same activity retention approach used by the existing system.
-      data.activity = data.activity.slice(0, 12);
+      // Check the latest service list before issuing the ticket.
+      message.textContent = "Checking selected service...";
 
       try {
-        localStorage.setItem(QUEUE_KEY, JSON.stringify(data));
-      } catch (error) {
-        console.error("Could not save ticket:", error);
+        const response = await fetch(
+          `${API_BASE}/public/services?floor=${encodeURIComponent(floorKey)}`,
+          { cache: "no-store" }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Could not verify service.");
+        }
+
+        const latestServices = Array.isArray(result.services)
+          ? result.services.filter(service =>
+              getServiceId(service) !== "" &&
+              isServiceActive(service) &&
+              serviceBelongsToFloor(service, floorKey)
+            )
+          : [];
+
+        // Do not issue a ticket if the selected service is no longer active.
+        const service = latestServices.find(
+          item => getServiceId(item) === selectedId
+        );
+
+        activeServices = latestServices;
+
+        if (!service) {
+          message.textContent =
+            "The selected service is no longer active. Please select a service again.";
+          await loadServices();
+          return;
+        }
+
+        // Update the dropdown if the service list changed.
+        const stillAvailable = Array.from(serviceSelect.options).some(
+          option => option.value === selectedId
+        );
+
+        if (!stillAvailable) {
+          await loadServices();
+          message.textContent =
+            "The service list has changed. Please select your service again.";
+          return;
+        }
+
+        const data = readQueueData();
+
+        if (!data) {
+          message.textContent =
+            "Queue data could not be read. Please refresh and try again.";
+          await loadServices({ preserveSelection: true });
+          return;
+        }
+
+        const floor = data.floors[floorKey];
+
+        if (!floor) {
+          message.textContent = "Floor data is missing. Please refresh the page.";
+          await loadServices();
+          return;
+        }
+
+        const existingTickets = [
+          ...floor.waiting,
+          ...(floor.serving ? [floor.serving] : []),
+          ...data.activity
+            .filter(item => item && item.ticket)
+            .map(item => item.ticket)
+        ];
+
+        const prefix = `${floorKey}-`;
+        let nextNumber = Math.max(1, Number(floor.next) || 1);
+
+        const usedNumbers = existingTickets
+          .filter(ticket =>
+            typeof ticket === "string" && ticket.startsWith(prefix)
+          )
+          .map(ticket => Number(ticket.slice(prefix.length)))
+          .filter(number => Number.isInteger(number) && number > 0);
+
+        if (usedNumbers.length) {
+          nextNumber = Math.max(
+            nextNumber,
+            Math.max(...usedNumbers) + 1
+          );
+        }
+
+        const ticket =
+          `${floorKey}-${String(nextNumber).padStart(3, "0")}`;
+
+        floor.next = nextNumber + 1;
+        floor.waiting.push(ticket);
+        data.totalIssued = (Number(data.totalIssued) || 0) + 1;
+
+        data.activity.unshift({
+          ticket,
+          floor: floor.name || floors[floorKey].name,
+          service: String(service.name),
+          serviceCode: String(service.code),
+          status: "Waiting",
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+          })
+        });
+
+        data.activity = data.activity.slice(0, 12);
+
+        try {
+          localStorage.setItem(QUEUE_KEY, JSON.stringify(data));
+        } catch (error) {
+          console.error("Could not save ticket:", error);
+          message.textContent =
+            "Ticket could not be saved. Check browser storage settings and try again.";
+          await loadServices({ preserveSelection: true });
+          return;
+        }
+
+        issuedTicket = ticket;
+
+        document.getElementById("ticketNumber").textContent = ticket;
+        document.getElementById("ticketFloor").textContent =
+          floor.name || floors[floorKey].name;
+        document.getElementById("ticketService").textContent =
+          getServiceLabel(service);
+
+        setTicketStatus("Waiting");
+        ticketResult.classList.add("show");
+
+        ticketResult.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+
         message.textContent =
-          "Ticket could not be saved. Check browser storage settings and try again.";
-        loadServices({ preserveSelection: true });
-        return;
+          `Ticket ${ticket} issued successfully. Please wait for your number to be called.`;
+
+        updateTicketStatus();
+
+        await loadServices();
+      } catch (error) {
+        console.error("Could not verify selected service:", error);
+
+        message.textContent =
+          "Could not verify the service. Please refresh the service list and try again.";
+
+        await loadServices({ preserveSelection: true });
       }
-
-      issuedTicket = ticket;
-
-      document.getElementById("ticketNumber").textContent = ticket;
-      document.getElementById("ticketFloor").textContent =
-        floor.name || floors[floorKey].name;
-      document.getElementById("ticketService").textContent =
-        getServiceLabel(service);
-
-      setTicketStatus("Waiting");
-      ticketResult.classList.add("show");
-
-      ticketResult.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-
-      message.textContent = `Ticket ${ticket} issued successfully. Please wait for your number to be called.`;
-
-      updateTicketStatus();
-
-      // Refresh available services after issuing while leaving the
-      // issued ticket visible to the customer.
-      loadServices();
     }
 
     serviceSelect.addEventListener("change", () => {
@@ -810,7 +801,6 @@ async function loadServices(options = {}) {
 
     document.getElementById("refreshServices").addEventListener("click", () => {
       loadServices({ preserveSelection: true });
-      message.textContent = "Service list refreshed.";
     });
 
     issueBtn.addEventListener("click", issueQueueTicket);
@@ -820,23 +810,18 @@ async function loadServices(options = {}) {
     });
 
     window.addEventListener("storage", event => {
-      if (event.key === SERVICE_KEY || event.key === null) {
-        loadServices({ preserveSelection: true });
-      }
-
       if (event.key === QUEUE_KEY || event.key === null) {
         updateTicketStatus();
       }
     });
 
-    // Refresh services and ticket status as a backup for cross-tab changes.
+    // Refresh the active service list and ticket status periodically.
     setInterval(() => {
       loadServices({ preserveSelection: true });
       updateTicketStatus();
-    }, 3000);
+    }, 10000);
 
     loadServices();
   </script>
 </body>
 </html>
-```
